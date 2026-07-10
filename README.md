@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal configuration repository.
+My personal workspace for terminal setup, workflow, and documentation.
 
 Licensed under MIT. See [LICENSE](LICENSE).
 

@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'dotfiles',
-  description: 'Personal dotfiles documentation',
+  description: 'My personal workspace for terminal setup, workflow, and documentation.',
   cleanUrls: true,
   themeConfig: {
     siteTitle: 'dotfiles',

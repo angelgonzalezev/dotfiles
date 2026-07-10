@@ -1,7 +1,7 @@
 # dotfiles docs
 
-Personal documentation for installing, using, and maintaining this dotfiles
-repository.
+My personal workspace for terminal setup, workflow, and documentation, built
+to keep development faster, clearer, and easier to maintain.
 
 ## Links
 
