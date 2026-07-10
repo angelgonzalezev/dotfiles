@@ -1,29 +1,34 @@
-# Documentation
+# dotfiles docs
 
-Quick reference for the applications managed by this dotfiles repository.
+Personal documentation for installing, using, and maintaining this dotfiles
+repository.
 
-## Applications
+## Getting Started
 
-- [Neovim](nvim.md)
-- [WezTerm](wezterm.md)
-
-## Repository Commands
-
-| Command | Purpose |
+| Page | Use it for |
 | --- | --- |
-| `bin/dotfiles-status` | Show the Git status for this repository. |
-| `bin/dotfiles-doctor` | Check basic dependencies, Git status, and tracked file names that may be sensitive. |
-| `bin/dotfiles-install` | Link configured packages into `$HOME` with GNU Stow. Defaults to `nvim` and `wezterm`. |
-| `bin/dotfiles-sync` | Show status and print the manual commit/push flow. |
+| [Overview](getting-started/overview.md) | Understand what this repo manages. |
+| [Install](getting-started/install.md) | Install the configurations from any terminal. |
+| [Daily Workflow](getting-started/daily-workflow.md) | Update, edit, commit, and sync changes. |
 
-## Install Layout
+## Guides
 
-This repository uses GNU Stow package layout:
+| Page | Use it for |
+| --- | --- |
+| [Managing Configurations](guides/managing-configurations.md) | Add or remove packages from the repo. |
+| [Backups and Restore](guides/backups-and-restore.md) | Find backups and restore previous configs. |
 
-```text
-nvim/.config/nvim/
-wezterm/.config/wezterm/
-```
+## Apps
 
-From the repository root, `stow --target="$HOME" nvim` links
-`~/.config/nvim` to the tracked Neovim package.
+| Page | Use it for |
+| --- | --- |
+| [Neovim](apps/nvim.md) | Keyboard shortcuts, plugins, and UI notes. |
+| [WezTerm](apps/wezterm.md) | Keyboard shortcuts, panes, tabs, and UI notes. |
+
+## Reference
+
+| Page | Use it for |
+| --- | --- |
+| [Repository Layout](reference/repository-layout.md) | Understand the folder structure. |
+| [Commands](reference/commands.md) | See what each script in `bin/` does. |
+| [Contributing](reference/contributing.md) | Checks to run before publishing changes. |

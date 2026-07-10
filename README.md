@@ -26,18 +26,12 @@ bin/
   dotfiles-sync
 ```
 
-## Common commands
-
-```sh
-bin/dotfiles-status
-bin/dotfiles-doctor
-```
-
 ## Documentation
 
 - [Docs index](docs/README.md)
-- [Neovim](docs/nvim.md)
-- [WezTerm](docs/wezterm.md)
+- [Install](docs/getting-started/install.md)
+- [Neovim](docs/apps/nvim.md)
+- [WezTerm](docs/apps/wezterm.md)
 
 ## Install
 
@@ -112,7 +106,16 @@ bin/dotfiles-install nvim
 bin/dotfiles-install wezterm
 ```
 
-## GitHub
+## Contributing
+
+These commands are for maintaining this repository, not for normal
+installation.
+
+Show the repository status:
+
+```sh
+bin/dotfiles-status
+```
 
 Before publishing, run:
 
