@@ -19,6 +19,7 @@ wezterm/
   .config/
     wezterm/
 bin/
+  bootstrap
   dotfiles-doctor
   dotfiles-install
   dotfiles-status
@@ -39,6 +40,30 @@ bin/dotfiles-doctor
 - [WezTerm](docs/wezterm.md)
 
 ## Install
+
+Install everything from any terminal:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
+```
+
+To install only one package:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- nvim
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- wezterm
+```
+
+Existing config folders are backed up automatically to:
+
+```text
+~/.config/dotfiles-backups/
+```
+
+If the repository already exists locally, the bootstrap updates it with
+`git pull --ff-only`. Commit, stash, or discard local changes before running it.
+
+### Manual Install
 
 Install the required tool:
 

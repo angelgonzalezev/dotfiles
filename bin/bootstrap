@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_url="${DOTFILES_REPO_URL:-https://github.com/angelgonzalezev/dotfiles.git}"
+repo_dir="${DOTFILES_DIR:-$HOME/.config/dotfiles}"
+backup_root="${DOTFILES_BACKUP_DIR:-$HOME/.config/dotfiles-backups}"
+packages=("$@")
+
+if [ "${#packages[@]}" -eq 0 ]; then
+  packages=(nvim wezterm)
+fi
+
+log() {
+  printf '%s\n' "$*"
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    log "missing required command: $1"
+    exit 1
+  fi
+}
+
+install_stow() {
+  if command -v stow >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! command -v brew >/dev/null 2>&1; then
+    log "stow is not installed and Homebrew was not found."
+    log "Install Homebrew or install stow manually, then rerun this script."
+    exit 1
+  fi
+
+  log "installing stow with Homebrew"
+  brew install stow
+}
+
+clone_or_update_repo() {
+  if [ -d "$repo_dir/.git" ]; then
+    log "updating dotfiles repo: $repo_dir"
+    git -C "$repo_dir" pull --ff-only
+    return
+  fi
+
+  if [ -e "$repo_dir" ]; then
+    log "target exists but is not a git repository: $repo_dir"
+    log "Move it away or set DOTFILES_DIR to a different path."
+    exit 1
+  fi
+
+  log "cloning dotfiles repo: $repo_dir"
+  mkdir -p "$(dirname "$repo_dir")"
+  git clone "$repo_url" "$repo_dir"
+}
+
+target_for_package() {
+  case "$1" in
+    nvim) printf '%s\n' "$HOME/.config/nvim" ;;
+    wezterm) printf '%s\n' "$HOME/.config/wezterm" ;;
+    *)
+      log "unknown package: $1"
+      exit 1
+      ;;
+  esac
+}
+
+source_for_package() {
+  printf '%s\n' "$repo_dir/$1/.config/$1"
+}
+
+backup_existing_targets() {
+  local timestamp backup_dir package target source
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  backup_dir="$backup_root/$timestamp"
+
+  for package in "${packages[@]}"; do
+    target="$(target_for_package "$package")"
+    source="$(source_for_package "$package")"
+
+    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+      continue
+    fi
+
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+      log "already linked: $target"
+      continue
+    fi
+
+    mkdir -p "$backup_dir/.config"
+    log "backing up $target to $backup_dir/.config/$package"
+    mv "$target" "$backup_dir/.config/$package"
+  done
+}
+
+validate_packages() {
+  local package
+
+  for package in "${packages[@]}"; do
+    target_for_package "$package" >/dev/null
+  done
+}
+
+main() {
+  require_command git
+  validate_packages
+  install_stow
+  clone_or_update_repo
+  backup_existing_targets
+
+  log "installing packages: ${packages[*]}"
+  "$repo_dir/bin/dotfiles-install" "${packages[@]}"
+
+  log "done"
+}
+
+main
