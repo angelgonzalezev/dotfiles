@@ -38,14 +38,54 @@ bin/dotfiles-doctor
 - [Neovim](docs/nvim.md)
 - [WezTerm](docs/wezterm.md)
 
-When GNU Stow is installed, configs can be linked from the repo root with:
+## Install
+
+Install the required tool:
+
+```sh
+brew install stow
+```
+
+Clone the repository:
+
+```sh
+git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
+cd ~/.config/dotfiles
+```
+
+Check the repository before linking anything:
+
+```sh
+bin/dotfiles-doctor
+```
+
+Link the default packages into `$HOME`:
 
 ```sh
 bin/dotfiles-install
 ```
 
-Do not run `stow` blindly if real files already exist at the target paths.
-Back them up or move them into this repo first.
+This links:
+
+```text
+~/.config/nvim    -> ~/.config/dotfiles/nvim/.config/nvim
+~/.config/wezterm -> ~/.config/dotfiles/wezterm/.config/wezterm
+```
+
+If config folders already exist, back them up before installing:
+
+```sh
+mv ~/.config/nvim ~/.config/nvim.backup
+mv ~/.config/wezterm ~/.config/wezterm.backup
+bin/dotfiles-install
+```
+
+To install only one package:
+
+```sh
+bin/dotfiles-install nvim
+bin/dotfiles-install wezterm
+```
 
 ## GitHub
 
