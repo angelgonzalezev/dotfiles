@@ -14,4 +14,4 @@ if [ "${#packages[@]}" -eq 0 ]; then
   packages=(nvim wezterm tmux)
 fi
 
-stow --target="$HOME" "${packages[@]}"
+stow --no-folding --target="$HOME" "${packages[@]}"
