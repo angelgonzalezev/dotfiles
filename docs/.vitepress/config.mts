@@ -32,7 +32,8 @@ export default defineConfig({
         text: 'Guides',
         items: [
           { text: 'Managing Configurations', link: '/guides/managing-configurations' },
-          { text: 'Backups and Restore', link: '/guides/backups-and-restore' }
+          { text: 'Backups and Restore', link: '/guides/backups-and-restore' },
+          { text: 'macOS Terminal Shortcut', link: '/guides/macos-terminal-shortcut' }
         ]
       },
       {
@@ -40,7 +41,8 @@ export default defineConfig({
         items: [
           { text: 'Neovim', link: '/apps/nvim' },
           { text: 'WezTerm', link: '/apps/wezterm' },
-          { text: 'tmux', link: '/apps/tmux' }
+          { text: 'tmux', link: '/apps/tmux' },
+          { text: 'Zsh', link: '/apps/zsh' }
         ]
       },
       {

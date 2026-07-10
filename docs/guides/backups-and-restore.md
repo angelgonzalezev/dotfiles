@@ -14,6 +14,7 @@ Example:
 ~/.config/dotfiles-backups/20260710-154500/.config/nvim
 ~/.config/dotfiles-backups/20260710-154500/.tmux.conf
 ~/.config/dotfiles-backups/20260710-154500/.local/bin/tmux-dev
+~/.config/dotfiles-backups/20260710-154500/.zshrc
 ```
 
 ## Restore A Backup
@@ -39,6 +40,13 @@ If a tmux layout command was backed up, restore it the same way:
 ```sh
 rm ~/.local/bin/tmux-dev
 mv ~/.config/dotfiles-backups/<timestamp>/.local/bin/tmux-dev ~/.local/bin/tmux-dev
+```
+
+For `zsh`, restore the shell config directly:
+
+```sh
+rm ~/.zshrc
+mv ~/.config/dotfiles-backups/<timestamp>/.zshrc ~/.zshrc
 ```
 
 ## Reinstall After Restore

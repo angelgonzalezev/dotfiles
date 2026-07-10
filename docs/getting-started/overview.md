@@ -10,6 +10,7 @@ easy to reproduce on a new machine.
 | Neovim | `nvim` | `~/.config/nvim` |
 | WezTerm | `wezterm` | `~/.config/wezterm` |
 | tmux | `tmux` | `~/.tmux.conf`, `~/.local/bin/tmux-*` |
+| Zsh | `zsh` | `~/.zshrc` |
 
 ## How It Works
 
@@ -21,6 +22,7 @@ nvim/.config/nvim/
 wezterm/.config/wezterm/
 tmux/.tmux.conf
 tmux/.local/bin/
+zsh/.zshrc
 ```
 
 When installed, Stow creates symlinks from your home directory to this repo.

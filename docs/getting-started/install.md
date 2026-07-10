@@ -24,6 +24,21 @@ Install only tmux:
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux
 ```
 
+Install only Zsh:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- zsh
+```
+
+Install Oh My Zsh before installing the `zsh` package:
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+Before installing `zsh` on an existing machine, move local SDK paths, tokens,
+and generated tool exports to `~/.zshrc.local`.
+
 ## What The Bootstrap Does
 
 1. Checks that `git` exists.

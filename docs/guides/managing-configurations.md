@@ -30,6 +30,7 @@ From the repo root:
 bin/dotfiles-install nvim
 bin/dotfiles-install wezterm
 bin/dotfiles-install tmux
+bin/dotfiles-install zsh
 ```
 
 ## Remove A Package

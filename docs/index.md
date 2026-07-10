@@ -25,6 +25,7 @@ to keep development faster, clearer, and easier to maintain.
 | --- | --- |
 | [Managing Configurations](guides/managing-configurations.md) | Add or remove packages from the repo. |
 | [Backups and Restore](guides/backups-and-restore.md) | Find backups and restore previous configs. |
+| [macOS Terminal Shortcut](guides/macos-terminal-shortcut.md) | Open WezTerm with commands and keyboard shortcuts. |
 
 ## Apps
 
@@ -33,6 +34,7 @@ to keep development faster, clearer, and easier to maintain.
 | [Neovim](apps/nvim.md) | Keyboard shortcuts, plugins, and UI notes. |
 | [WezTerm](apps/wezterm.md) | Keyboard shortcuts, panes, tabs, and UI notes. |
 | [tmux](apps/tmux.md) | Session management, panes, and terminal workflow. |
+| [Zsh](apps/zsh.md) | Shell prompt, Oh My Zsh, plugins, and local overrides. |
 
 ## Reference
 

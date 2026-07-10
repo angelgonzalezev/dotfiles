@@ -17,6 +17,7 @@ bin/dotfiles-install
 bin/dotfiles-install nvim
 bin/dotfiles-install wezterm
 bin/dotfiles-install tmux
+bin/dotfiles-install zsh
 ```
 
 ## `bin/dotfiles-doctor`
@@ -79,3 +80,14 @@ exit
 
 Use `tmux kill-session` to close the current session. Use `tmux kill-server`
 only when you want to close every tmux session at once.
+
+## Shell And Terminal Commands
+
+```sh
+source ~/.zshrc
+open -a WezTerm
+open -a WezTerm ~/Desktop
+```
+
+Use `source ~/.zshrc` after editing the shell prompt. Use `open -a WezTerm` to
+open the terminal app from any shell.

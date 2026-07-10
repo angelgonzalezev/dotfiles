@@ -7,7 +7,7 @@ backup_root="${DOTFILES_BACKUP_DIR:-$HOME/.config/dotfiles-backups}"
 packages=("$@")
 
 if [ "${#packages[@]}" -eq 0 ]; then
-  packages=(nvim wezterm tmux)
+  packages=(nvim wezterm tmux zsh)
 fi
 
 log() {
@@ -67,6 +67,9 @@ targets_for_package() {
       printf '%s\n' "$HOME/.local/bin/tmux-dev"
       printf '%s\n' "$HOME/.local/bin/tmux-agent"
       ;;
+    zsh)
+      printf '%s\n' "$HOME/.zshrc"
+      ;;
     *)
       log "unknown package: $1"
       exit 1
@@ -89,6 +92,7 @@ source_for_target() {
           ;;
       esac
       ;;
+    zsh) printf '%s\n' "$repo_dir/zsh/.zshrc" ;;
     *)
       log "unknown package: $1"
       exit 1
@@ -111,6 +115,7 @@ backup_path_for_target() {
           ;;
       esac
       ;;
+    zsh) printf '%s\n' "$backup_root/$2/.zshrc" ;;
     *)
       log "unknown package: $1"
       exit 1
@@ -166,7 +171,7 @@ validate_packages() {
 
   for package in "${packages[@]}"; do
     case "$package" in
-      nvim|wezterm|tmux) ;;
+      nvim|wezterm|tmux|zsh) ;;
       *)
         log "unknown package: $package"
         exit 1
