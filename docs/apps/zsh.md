@@ -23,7 +23,10 @@ plugins, and theme conventions used by this setup.
 
 ## Install Oh My Zsh
 
-Install Oh My Zsh before installing the `zsh` package from this repo:
+The tracked `zsh/.zshrc` is portable. It contains only shell behavior that
+should be shared between machines.
+
+Install Oh My Zsh manually:
 
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -44,6 +47,13 @@ bin/dotfiles-install zsh
 source ~/.zshrc
 ```
 
+The interactive bootstrap can also install Oh My Zsh and
+`zsh-autosuggestions` for you:
+
+```sh
+~/.config/dotfiles/bin/bootstrap zsh
+```
+
 Before installing this package on a machine that already has a large `.zshrc`,
 move machine-specific exports and generated tool paths to `~/.zshrc.local`.
 The installer backs up the existing `.zshrc`, but the tracked config should stay
@@ -57,6 +67,9 @@ The prompt icon is controlled by this line in `zsh/.zshrc`:
 PROMPT="${PROMPT//➜/👼}"
 ```
 
+The `robbyrussell` theme normally renders `➜`. This line keeps the rest of the
+theme unchanged and only replaces that symbol.
+
 To use a different icon, replace `👼` with another symbol:
 
 ```sh
@@ -69,6 +82,13 @@ After changing it, reload the shell:
 source ~/.zshrc
 ```
 
+If the prompt does not change, open a new terminal tab or check that
+`~/.zshrc` points to the repo:
+
+```sh
+ls -la ~/.zshrc
+```
+
 ## Local Configuration
 
 Keep machine-specific configuration in `~/.zshrc.local`:
@@ -79,3 +99,13 @@ export PATH="$ANDROID_HOME/platform-tools:$PATH"
 ```
 
 That file is intentionally not managed by this repo.
+
+Examples of values that belong in `~/.zshrc.local`:
+
+```text
+SDK paths
+work credentials
+machine-specific aliases
+tool-generated PATH entries
+private tokens
+```

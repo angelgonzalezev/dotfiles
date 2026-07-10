@@ -5,6 +5,12 @@ repo_url="${DOTFILES_REPO_URL:-https://github.com/angelgonzalezev/dotfiles.git}"
 repo_dir="${DOTFILES_DIR:-$HOME/.config/dotfiles}"
 backup_root="${DOTFILES_BACKUP_DIR:-$HOME/.config/dotfiles-backups}"
 packages=("$@")
+assume_yes="${DOTFILES_ASSUME_YES:-0}"
+install_cli_tools=0
+install_wezterm=0
+install_oh_my_zsh=0
+install_zsh_autosuggestions=0
+install_configs=1
 
 if [ "${#packages[@]}" -eq 0 ]; then
   packages=(nvim wezterm tmux zsh)
@@ -12,6 +18,27 @@ fi
 
 log() {
   printf '%s\n' "$*"
+}
+
+confirm() {
+  local prompt reply
+  prompt="$1"
+
+  if [ "$assume_yes" = "1" ]; then
+    return 0
+  fi
+
+  if [ ! -t 0 ]; then
+    return 1
+  fi
+
+  printf '%s [y/N] ' "$prompt"
+  read -r reply
+
+  case "$reply" in
+    y|Y|yes|YES) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 require_command() {
@@ -34,6 +61,149 @@ install_stow() {
 
   log "installing stow with Homebrew"
   brew install stow
+}
+
+install_homebrew() {
+  if command -v brew >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! confirm "Homebrew is missing. Install Homebrew?"; then
+    log "Homebrew is required to install dependencies automatically."
+    log "Install Homebrew manually or rerun with DOTFILES_ASSUME_YES=1."
+    exit 1
+  fi
+
+  log "installing Homebrew"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+}
+
+brew_install_formula() {
+  local formula
+  formula="$1"
+
+  if brew list --formula "$formula" >/dev/null 2>&1; then
+    log "already installed: $formula"
+    return
+  fi
+
+  log "installing formula: $formula"
+  brew install "$formula"
+}
+
+brew_install_cask() {
+  local cask
+  cask="$1"
+
+  if brew list --cask "$cask" >/dev/null 2>&1; then
+    log "already installed: $cask"
+    return
+  fi
+
+  log "installing cask: $cask"
+  brew install --cask "$cask"
+}
+
+install_cli_dependencies() {
+  brew_install_formula stow
+  brew_install_formula neovim
+  brew_install_formula tmux
+}
+
+install_oh_my_zsh_dependency() {
+  if [ -d "$HOME/.oh-my-zsh" ]; then
+    log "already installed: Oh My Zsh"
+    return
+  fi
+
+  log "installing Oh My Zsh"
+  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+}
+
+install_zsh_autosuggestions_dependency() {
+  local plugin_dir
+  plugin_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+
+  if [ -d "$plugin_dir" ]; then
+    log "already installed: zsh-autosuggestions"
+    return
+  fi
+
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    log "Oh My Zsh is required before installing zsh-autosuggestions."
+    return
+  fi
+
+  log "installing zsh-autosuggestions"
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$plugin_dir"
+}
+
+configure_interactive_install() {
+  if [ "$assume_yes" = "1" ]; then
+    install_cli_tools=1
+    install_wezterm=1
+    install_oh_my_zsh=1
+    install_zsh_autosuggestions=1
+    install_configs=1
+    return
+  fi
+
+  if [ ! -t 0 ]; then
+    install_cli_tools=0
+    install_wezterm=0
+    install_oh_my_zsh=0
+    install_zsh_autosuggestions=0
+    install_configs=1
+    return
+  fi
+
+  log "dotfiles bootstrap"
+  log "This installer can install apps and link configuration files."
+  log ""
+
+  if confirm "Install CLI tools with Homebrew (stow, neovim, tmux)?"; then
+    install_cli_tools=1
+  fi
+
+  if confirm "Install WezTerm with Homebrew Cask?"; then
+    install_wezterm=1
+  fi
+
+  if confirm "Install Oh My Zsh?"; then
+    install_oh_my_zsh=1
+  fi
+
+  if confirm "Install zsh-autosuggestions?"; then
+    install_zsh_autosuggestions=1
+  fi
+
+  if confirm "Install dotfiles packages (${packages[*]})?"; then
+    install_configs=1
+  else
+    install_configs=0
+  fi
+}
+
+install_selected_dependencies() {
+  if [ "$install_cli_tools" = "1" ] || [ "$install_wezterm" = "1" ]; then
+    install_homebrew
+  fi
+
+  if [ "$install_cli_tools" = "1" ]; then
+    install_cli_dependencies
+  fi
+
+  if [ "$install_wezterm" = "1" ]; then
+    brew_install_cask wezterm
+  fi
+
+  if [ "$install_oh_my_zsh" = "1" ]; then
+    install_oh_my_zsh_dependency
+  fi
+
+  if [ "$install_zsh_autosuggestions" = "1" ]; then
+    install_zsh_autosuggestions_dependency
+  fi
 }
 
 clone_or_update_repo() {
@@ -183,6 +353,15 @@ validate_packages() {
 main() {
   require_command git
   validate_packages
+  configure_interactive_install
+  install_selected_dependencies
+
+  if [ "$install_configs" != "1" ]; then
+    log "skipping dotfiles package installation"
+    log "done"
+    return
+  fi
+
   install_stow
   clone_or_update_repo
   backup_existing_targets

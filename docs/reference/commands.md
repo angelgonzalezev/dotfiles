@@ -8,6 +8,39 @@ One-command installer intended to run from any terminal.
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
 ```
 
+This mode links dotfiles packages and installs `stow` if needed. It does not ask
+interactive questions because the script is streamed through standard input.
+
+Interactive local run:
+
+```sh
+~/.config/dotfiles/bin/bootstrap
+```
+
+This mode can ask before installing CLI tools, WezTerm, Oh My Zsh,
+`zsh-autosuggestions`, and dotfiles packages.
+
+Non-interactive run that accepts every install step:
+
+```sh
+DOTFILES_ASSUME_YES=1 ~/.config/dotfiles/bin/bootstrap
+```
+
+Install selected packages only:
+
+```sh
+~/.config/dotfiles/bin/bootstrap nvim tmux zsh
+```
+
+Useful environment variables:
+
+```sh
+DOTFILES_REPO_URL=https://github.com/angelgonzalezev/dotfiles.git
+DOTFILES_DIR=~/.config/dotfiles
+DOTFILES_BACKUP_DIR=~/.config/dotfiles-backups
+DOTFILES_ASSUME_YES=1
+```
+
 ## `bin/dotfiles-install`
 
 Links packages into `$HOME` with GNU Stow.
@@ -19,6 +52,8 @@ bin/dotfiles-install wezterm
 bin/dotfiles-install tmux
 bin/dotfiles-install zsh
 ```
+
+This command never installs apps. It only creates symlinks.
 
 ## `bin/dotfiles-doctor`
 
