@@ -3,6 +3,14 @@
 Personal documentation for installing, using, and maintaining this dotfiles
 repository.
 
+## Links
+
+| Link | URL |
+| --- | --- |
+| GitHub | [github.com/angelgonzalezev/dotfiles](https://github.com/angelgonzalezev/dotfiles) |
+| X / Twitter | [x.com/angelgonzaleh](https://x.com/angelgonzaleh) |
+| YouTube | [youtube.com/@byangelgonzalez](https://www.youtube.com/@byangelgonzalez) |
+
 ## Getting Started
 
 | Page | Use it for |

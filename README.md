@@ -28,7 +28,7 @@ bin/
 
 ## Documentation
 
-- [Docs index](docs/README.md)
+- [Docs index](docs/index.md)
 - [Install](docs/getting-started/install.md)
 - [Neovim](docs/apps/nvim.md)
 - [WezTerm](docs/apps/wezterm.md)

@@ -18,7 +18,7 @@ Then update:
 ```text
 bin/dotfiles-install
 bin/bootstrap
-docs/README.md
+docs/index.md
 README.md
 ```
 

@@ -29,6 +29,8 @@ venv/
 __pycache__/
 .cache/
 .Trash/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
 
 # Tool-specific state that should not be mirrored into this repo.
 gcloud/

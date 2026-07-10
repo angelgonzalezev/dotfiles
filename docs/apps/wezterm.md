@@ -1,10 +1,34 @@
 # WezTerm
 
+WezTerm is a cross-platform terminal emulator and multiplexer. It supports tabs,
+panes, GPU-accelerated rendering, rich font features, Lua configuration, and
+searchable documentation. In this setup it is the main terminal UI around tools
+like Neovim, Git, and shell sessions.
+
+![WezTerm terminal preview](/images/apps/wezterm-overview.svg)
+
 Configuration file:
 
 ```text
 wezterm/.config/wezterm/wezterm.lua
 ```
+
+## Official Resources
+
+| Resource | URL |
+| --- | --- |
+| Website | [wezterm.org](https://wezterm.org/) |
+| Configuration docs | [wezterm.org/config](https://wezterm.org/config/files.html) |
+| GitHub | [github.com/wez/wezterm](https://github.com/wez/wezterm) |
+
+## What It Is Used For Here
+
+| Use | Notes |
+| --- | --- |
+| Terminal sessions | Main shell and command-line workspace. |
+| Tabs and panes | Quickly switch between multiple terminal contexts. |
+| Neovim host | Runs Neovim with custom colors, tabs, and font settings. |
+| Lua configuration | Appearance and shortcuts live in `wezterm.lua`. |
 
 ## Custom Shortcuts
 

@@ -1,10 +1,33 @@
 # Neovim
 
+Neovim is a Vim-based text editor focused on extensibility, modern terminal
+features, Lua configuration, built-in LSP support, and plugin-driven workflows.
+In this setup it is the main terminal editor for editing code and dotfiles.
+
+![Neovim showing the Snacks picker and WezTerm configuration](/images/apps/nvim-screenshot.png)
+
 Configuration file:
 
 ```text
 nvim/.config/nvim/init.lua
 ```
+
+## Official Resources
+
+| Resource | URL |
+| --- | --- |
+| Website | [neovim.io](https://neovim.io/) |
+| Documentation | [neovim.io/doc](https://neovim.io/doc/) |
+| GitHub | [github.com/neovim/neovim](https://github.com/neovim/neovim) |
+
+## What It Is Used For Here
+
+| Use | Notes |
+| --- | --- |
+| Editing code | Fast keyboard-first editor inside the terminal. |
+| Editing dotfiles | Main editor for this repository's config and docs. |
+| Project search | Uses Snacks picker for files, text, and buffers. |
+| Lua configuration | The setup lives in `init.lua` and is managed with `lazy.nvim`. |
 
 ## Leader Key
 
