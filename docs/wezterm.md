@@ -1,0 +1,91 @@
+# WezTerm
+
+Configuration file:
+
+```text
+wezterm/.config/wezterm/wezterm.lua
+```
+
+## Custom Shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd Option Left` | Move to previous tab |
+| `Cmd Option Right` | Move to next tab |
+
+## Common Shortcuts
+
+### Tabs and Windows
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd T` | Open new tab |
+| `Cmd W` | Close current tab, with confirmation |
+| `Cmd N` | Open new window |
+| `Cmd Q` | Quit WezTerm |
+| `Cmd 1` ... `Cmd 8` | Go to tab 1 ... 8 |
+| `Cmd 9` | Go to last tab |
+| `Cmd Shift [` | Move to previous tab |
+| `Cmd Shift ]` | Move to next tab |
+| `Cmd Option Left` | Move to previous tab, custom shortcut |
+| `Cmd Option Right` | Move to next tab, custom shortcut |
+
+### Panes
+
+| Shortcut | Action |
+| --- | --- |
+| `Ctrl Alt "` | Split pane vertically |
+| `Ctrl Alt %` | Split pane horizontally |
+| `Ctrl Shift Left` | Focus pane on the left |
+| `Ctrl Shift Right` | Focus pane on the right |
+| `Ctrl Shift Up` | Focus pane above |
+| `Ctrl Shift Down` | Focus pane below |
+| `Ctrl Shift Z` | Toggle pane zoom |
+
+### Copy, Paste, and Search
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd C` | Copy to clipboard |
+| `Cmd V` | Paste from clipboard |
+| `Cmd F` | Search |
+| `Ctrl Shift X` | Enter copy mode |
+| `Ctrl Shift Space` | Quick select |
+
+### Display
+
+| Shortcut | Action |
+| --- | --- |
+| `Cmd =` | Increase font size |
+| `Cmd -` | Decrease font size |
+| `Cmd 0` | Reset font size |
+| `Alt Enter` | Toggle fullscreen |
+| `Cmd R` | Reload configuration |
+
+## UI
+
+| Area | Configuration |
+| --- | --- |
+| Font | JetBrains Mono |
+| Font size | 14 |
+| Theme | Catppuccin Mocha |
+| Window opacity | 84% |
+| macOS blur | 35 |
+| Line height | 1.05 |
+| Window decorations | Integrated macOS buttons with resize |
+| Tab bar | Always visible, custom formatted |
+| New tab button | Hidden |
+
+## Tab Bar
+
+Tabs show:
+
+| Element | Behavior |
+| --- | --- |
+| Index | One-based tab number |
+| Title | Explicit tab title, or active pane title |
+| Active tab | Lavender background |
+| Inactive tab | Dark background |
+| Hovered tab | Brighter dark background |
+
+Long tab titles are truncated to fit the tab width.

@@ -32,6 +32,12 @@ bin/dotfiles-status
 bin/dotfiles-doctor
 ```
 
+## Documentation
+
+- [Docs index](docs/README.md)
+- [Neovim](docs/nvim.md)
+- [WezTerm](docs/wezterm.md)
+
 When GNU Stow is installed, configs can be linked from the repo root with:
 
 ```sh
