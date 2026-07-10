@@ -2,6 +2,8 @@
 
 Personal configuration repository.
 
+Licensed under MIT. See [LICENSE](LICENSE).
+
 This repo is intentionally conservative: only curated configuration files should
 be tracked. Credentials, local state, caches, logs, generated dependency trees,
 and machine-specific files must stay out of Git.
