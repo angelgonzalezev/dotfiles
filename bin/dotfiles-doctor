@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+echo "repo: $repo_root"
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "missing: git"
+  exit 1
+fi
+
+if command -v stow >/dev/null 2>&1; then
+  echo "stow: $(stow --version | head -n 1)"
+else
+  echo "stow: not installed"
+fi
+
+echo
+echo "git status:"
+git status --short --branch
+
+echo
+echo "possible sensitive tracked content:"
+if git ls-files | rg -n "(credential|credentials|secret|token|password|passwd|access_token|refresh_token|api[_-]?key|client_secret|\\.pem$|\\.key$|\\.p12$|\\.pfx$)" >/tmp/dotfiles-sensitive-check.txt; then
+  cat /tmp/dotfiles-sensitive-check.txt
+  exit 2
+else
+  echo "none detected in tracked file names"
+fi

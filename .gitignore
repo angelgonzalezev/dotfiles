@@ -1,0 +1,38 @@
+.DS_Store
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Secrets and credentials.
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.kdbx
+*.sqlite
+*.sqlite3
+*.db
+*.token
+*.secret
+id_rsa
+id_ed25519
+credentials*
+*_credentials*
+application_default_credentials.json
+
+# Local state and dependency directories.
+node_modules/
+.venv/
+venv/
+__pycache__/
+.cache/
+.Trash/
+
+# Tool-specific state that should not be mirrored into this repo.
+gcloud/
+gh/hosts.yml
+filezilla/
+configstore/
+yarn/global/node_modules/
