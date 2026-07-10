@@ -1,49 +1,38 @@
 # dotfiles
 
-My personal workspace for terminal setup, workflow, and documentation.
+My personal workspace for terminal setup, workflow, and documentation, built to
+make development faster, cleaner, and easier to maintain.
 
-Licensed under MIT. See [LICENSE](LICENSE).
+Created by [Angel Gonzalez](https://www.youtube.com/@byangelgonzalez). Licensed
+under MIT. See [LICENSE](LICENSE).
 
-This repo is intentionally conservative: only curated configuration files should
-be tracked. Credentials, local state, caches, logs, generated dependency trees,
-and machine-specific files must stay out of Git.
+## What This Project Is
 
-## Layout
+This is an open source dotfiles repository. It stores the configuration for the
+tools I use to work in the terminal: Neovim, WezTerm, tmux, and Zsh.
 
-Packages are arranged for GNU Stow. Each package mirrors the target path from
-`$HOME`.
+The goal is to make a development machine reproducible. Instead of configuring
+every app manually on every computer, the configuration lives in Git, can be
+installed with scripts, and is documented in one place.
 
-```text
-nvim/
-  .config/
-    nvim/
-wezterm/
-  .config/
-    wezterm/
-tmux/
-  .tmux.conf
-  .local/
-    bin/
-      tmux-agent
-      tmux-dev
-zsh/
-  .zshrc
-bin/
-  bootstrap
-  dotfiles-doctor
-  dotfiles-install
-  dotfiles-status
-  dotfiles-sync
-```
+## What It Helps With
 
-## Documentation
+| Problem | Solution |
+| --- | --- |
+| Setting up a new Mac takes too long. | Bootstrap can install tools and link config files. |
+| Terminal shortcuts are easy to forget. | The docs explain the commands used daily. |
+| Config files drift between machines. | Shared config is versioned and symlinked with Stow. |
+| Local machine config can leak into Git. | Local-only shell config lives in `~/.zshrc.local`. |
+| Terminal work gets disorganized. | tmux layouts and WezTerm tabs create repeatable workspaces. |
 
-- [Docs index](docs/index.md)
-- [Install](docs/getting-started/install.md)
-- [Neovim](docs/apps/nvim.md)
-- [WezTerm](docs/apps/wezterm.md)
-- [tmux](docs/apps/tmux.md)
-- [Zsh](docs/apps/zsh.md)
+## Managed Packages
+
+| Package | Installs config for | Main benefit |
+| --- | --- | --- |
+| `nvim` | Neovim | Keyboard-first editor with project search and plugins. |
+| `wezterm` | WezTerm | Terminal UI, tabs, theme, font, and navigation. |
+| `tmux` | tmux | Persistent sessions, panes, and workspace layout commands. |
+| `zsh` | Zsh / Oh My Zsh | Prompt, history, suggestions, and local command path. |
 
 ## Install
 
@@ -78,39 +67,68 @@ curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/b
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- zsh
 ```
 
-Existing config folders are backed up automatically to:
+Existing config files are backed up automatically to:
 
 ```text
 ~/.config/dotfiles-backups/
 ```
 
-If the repository already exists locally, the bootstrap updates it with
-`git pull --ff-only`. Commit, stash, or discard local changes before running it.
+## Documentation
 
-### Manual Install
+Start here:
 
-Install the required tool:
+- [Docs index](docs/index.md)
+- [Overview](docs/getting-started/overview.md)
+- [Install](docs/getting-started/install.md)
+- [Daily Workflow](docs/getting-started/daily-workflow.md)
+
+Apps:
+
+- [Neovim](docs/apps/nvim.md)
+- [WezTerm](docs/apps/wezterm.md)
+- [tmux](docs/apps/tmux.md)
+- [Zsh](docs/apps/zsh.md)
+
+Guides:
+
+- [Backups and Restore](docs/guides/backups-and-restore.md)
+- [Managing Configurations](docs/guides/managing-configurations.md)
+- [macOS Terminal Shortcut](docs/guides/macos-terminal-shortcut.md)
+
+## Layout
+
+Packages are arranged for GNU Stow. Each package mirrors the target path from
+`$HOME`.
+
+```text
+nvim/
+  .config/
+    nvim/
+wezterm/
+  .config/
+    wezterm/
+tmux/
+  .tmux.conf
+  .local/
+    bin/
+      tmux-agent
+      tmux-dev
+zsh/
+  .zshrc
+bin/
+  bootstrap
+  dotfiles-doctor
+  dotfiles-install
+  dotfiles-status
+  dotfiles-sync
+```
+
+## Manual Install
 
 ```sh
 brew install stow
-```
-
-Clone the repository:
-
-```sh
 git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
-```
-
-Check the repository before linking anything:
-
-```sh
-bin/dotfiles-doctor
-```
-
-Link the default packages into `$HOME`:
-
-```sh
 bin/dotfiles-install
 ```
 
@@ -124,48 +142,18 @@ This links:
 ~/.zshrc          -> ~/.config/dotfiles/zsh/.zshrc
 ```
 
-If config folders already exist, back them up before installing:
-
-```sh
-mv ~/.config/nvim ~/.config/nvim.backup
-mv ~/.config/wezterm ~/.config/wezterm.backup
-mv ~/.tmux.conf ~/.tmux.conf.backup
-mv ~/.zshrc ~/.zshrc.backup
-bin/dotfiles-install
-```
-
-To install only one package:
-
-```sh
-bin/dotfiles-install nvim
-bin/dotfiles-install wezterm
-bin/dotfiles-install tmux
-bin/dotfiles-install zsh
-```
-
-tmux also installs two workspace commands:
-
-```sh
-tmux-dev
-tmux-agent
-```
-
 ## Contributing
 
-These commands are for maintaining this repository, not for normal
-installation.
+This is an open source project. You can fork it, adapt it, and propose changes
+with pull requests.
 
-Show the repository status:
-
-```sh
-bin/dotfiles-status
-```
-
-Before publishing, run:
+Before publishing changes:
 
 ```sh
 bin/dotfiles-doctor
+npm run docs:build
 git status --short
 ```
 
-Keep the GitHub repo private unless every tracked file has been reviewed.
+Do not commit credentials, tokens, local state, caches, logs, generated
+dependency folders, or machine-specific private files.

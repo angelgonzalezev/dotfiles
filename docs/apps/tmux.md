@@ -4,6 +4,11 @@ tmux is a terminal multiplexer for managing persistent sessions, split panes,
 and multiple windows inside a single terminal. In this setup it is the layer
 that keeps shell work organized and quick to return to.
 
+::: tip Why it matters
+tmux lets you keep terminal work alive, split your workspace into panes, and
+reopen sessions without losing context.
+:::
+
 ## Official Resources
 
 | Resource | URL |
@@ -19,6 +24,53 @@ that keeps shell work organized and quick to return to.
 | Panes | Split the terminal for focused multitasking. |
 | Windows | Separate related tasks in one tmux session. |
 | Navigation | `Ctrl+a` prefix keeps the workflow consistent on macOS. |
+
+## Problems It Solves
+
+| Problem | Solution in this setup |
+| --- | --- |
+| Closing the terminal kills your workflow. | Detach with `Ctrl+a` then `d` and attach later. |
+| Running multiple commands needs many windows. | Split panes inside one tmux session. |
+| Recreating layouts wastes time. | `tmux-dev` and `tmux-agent` create reusable layouts. |
+| Default prefix is awkward. | Prefix is changed from `Ctrl+b` to `Ctrl+a`. |
+
+## First Steps
+
+Start tmux:
+
+```sh
+tmux
+```
+
+Detach without closing anything:
+
+```text
+Ctrl+a
+d
+```
+
+Reattach:
+
+```sh
+tmux attach
+```
+
+Start a two-pane workspace:
+
+```sh
+tmux-dev
+```
+
+Start a four-pane workspace:
+
+```sh
+tmux-agent
+```
+
+::: info Prefix key
+`Ctrl+a` is the tmux prefix. Press it first, release it, then press the command
+key. For example, `Ctrl+a` then `c` creates a new window.
+:::
 
 ## Key Bindings
 
@@ -79,3 +131,8 @@ tmux-agent content-workflow
 
 The config lives in `tmux/.tmux.conf`. Layout commands live in
 `tmux/.local/bin/`.
+
+::: warning `kill-server`
+`tmux kill-server` closes every tmux session. Use `tmux kill-session` when you
+only want to close the current session.
+:::

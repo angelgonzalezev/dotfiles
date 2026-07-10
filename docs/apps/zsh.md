@@ -3,6 +3,11 @@
 Zsh is the interactive shell used by the terminal. Oh My Zsh manages the prompt,
 plugins, and theme conventions used by this setup.
 
+::: tip Why it matters
+The shell is where every command starts. A clean prompt, shared history,
+suggestions, and a stable `PATH` make the terminal faster and easier to use.
+:::
+
 ## Official Resources
 
 | Resource | URL |
@@ -20,6 +25,36 @@ plugins, and theme conventions used by this setup.
 | Suggestions | Enables `zsh-autosuggestions` when the plugin is installed. |
 | Local commands | Adds `~/.local/bin` to `PATH` so commands like `tmux-dev` work anywhere. |
 | Local overrides | Loads `~/.zshrc.local` for machine-specific config that should not be committed. |
+
+## Problems It Solves
+
+| Problem | Solution in this setup |
+| --- | --- |
+| Prompt differs between machines. | The prompt is tracked and uses the `👼` icon. |
+| Shell history is fragmented. | History is shared across tabs and sessions. |
+| Local commands are hard to run globally. | `~/.local/bin` is added to `PATH`. |
+| Private machine config leaks into Git. | `~/.zshrc.local` is loaded but not tracked. |
+
+## First Steps
+
+Reload the shell after installing:
+
+```sh
+source ~/.zshrc
+```
+
+Check that the config is linked:
+
+```sh
+ls -la ~/.zshrc
+```
+
+Check that local commands work:
+
+```sh
+command -v tmux-dev
+command -v tmux-agent
+```
 
 ## Install Oh My Zsh
 

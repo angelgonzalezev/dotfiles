@@ -1,6 +1,7 @@
 # macOS Terminal Shortcut
 
-This setup uses WezTerm as the terminal app.
+This setup uses WezTerm as the terminal app. You can open it from a shell
+command, from macOS Shortcuts, or through a custom alias.
 
 ## Open WezTerm From A Command
 
@@ -14,6 +15,12 @@ Open WezTerm in the Desktop folder:
 
 ```sh
 open -a WezTerm ~/Desktop
+```
+
+Open WezTerm from the current shell with an alias:
+
+```sh
+alias terminal='open -a WezTerm'
 ```
 
 ## Create A Keyboard Shortcut
@@ -34,9 +41,14 @@ Recommended shortcut:
 Ctrl + Option + T
 ```
 
-## Optional Shell Alias
+::: tip Why this shortcut
+`Ctrl + Option + T` is memorable and usually avoids conflicts with common
+macOS and app-level shortcuts.
+:::
 
-Add this to `~/.zshrc.local` if you want a short shell command:
+## Store The Alias Safely
+
+Add aliases to `~/.zshrc.local`, not to the tracked `zsh/.zshrc`:
 
 ```sh
 alias terminal='open -a WezTerm'
@@ -52,4 +64,18 @@ Then run:
 
 ```sh
 terminal
+```
+
+## Troubleshooting
+
+Check that WezTerm is installed:
+
+```sh
+open -a WezTerm
+```
+
+If macOS says the app cannot be found, install it:
+
+```sh
+brew install --cask wezterm
 ```

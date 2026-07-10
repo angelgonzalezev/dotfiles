@@ -5,6 +5,12 @@ panes, GPU-accelerated rendering, rich font features, Lua configuration, and
 searchable documentation. In this setup it is the main terminal UI around tools
 like Neovim, Git, and shell sessions.
 
+::: tip Why it matters
+WezTerm is the visual shell for the workflow. It gives a consistent terminal
+experience with readable font settings, tabs, custom colors, and fast keyboard
+navigation.
+:::
+
 ![WezTerm terminal preview](/images/apps/wezterm-overview.svg)
 
 Configuration file:
@@ -29,6 +35,35 @@ wezterm/.config/wezterm/wezterm.lua
 | Tabs and panes | Quickly switch between multiple terminal contexts. |
 | Neovim host | Runs Neovim with custom colors, tabs, and font settings. |
 | Lua configuration | Appearance and shortcuts live in `wezterm.lua`. |
+
+## Problems It Solves
+
+| Problem | Solution in this setup |
+| --- | --- |
+| Terminal UI changes between machines. | The theme, font, padding, opacity, and tab bar are versioned. |
+| Switching tabs is slow. | `Cmd Option Left/Right` moves between tabs. |
+| Terminal config is hard to audit. | The setup is a single Lua file in the repo. |
+| macOS window controls can feel inconsistent. | Integrated native buttons are configured. |
+
+## First Steps
+
+Open WezTerm from macOS:
+
+```sh
+open -a WezTerm
+```
+
+Open WezTerm in the Desktop folder:
+
+```sh
+open -a WezTerm ~/Desktop
+```
+
+Reload config after editing:
+
+```text
+Cmd R
+```
 
 ## Custom Shortcuts
 
@@ -113,3 +148,8 @@ Tabs show:
 | Hovered tab | Brighter dark background |
 
 Long tab titles are truncated to fit the tab width.
+
+::: info WezTerm vs tmux
+WezTerm tabs are terminal-app tabs. tmux windows and panes live inside a shell
+session and can stay alive even when the terminal window closes.
+:::

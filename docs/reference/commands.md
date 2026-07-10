@@ -1,8 +1,14 @@
 # Commands
 
+This page collects the commands used by the installer, daily workflow, tmux,
+Zsh, and macOS terminal setup.
+
 ## `bin/bootstrap`
 
-One-command installer intended to run from any terminal.
+Full installer. It can install dependencies, update the repo, back up existing
+config files, and link packages.
+
+Quick install:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
@@ -55,74 +61,68 @@ bin/dotfiles-install zsh
 
 This command never installs apps. It only creates symlinks.
 
-## `bin/dotfiles-doctor`
+## Maintenance Commands
 
-Checks the repo path, Stow availability, Git status, and tracked file names that
-look sensitive.
+| Command | Purpose |
+| --- | --- |
+| `bin/dotfiles-doctor` | Checks the repo path, Stow availability, Git status, and suspicious tracked file names. |
+| `bin/dotfiles-status` | Shows compact Git status for the repo. |
+| `bin/dotfiles-sync` | Shows status and prints the manual commit/push flow. |
 
 ```sh
 bin/dotfiles-doctor
-```
-
-## `bin/dotfiles-status`
-
-Shows compact Git status for the repo.
-
-```sh
 bin/dotfiles-status
-```
-
-## `bin/dotfiles-sync`
-
-Shows status and prints the manual commit/push flow.
-
-```sh
 bin/dotfiles-sync
 ```
 
-## `tmux-dev`
+## tmux Layout Commands
 
-Opens or attaches to a tmux session named `dev` with two panes side by side.
+| Command | Purpose |
+| --- | --- |
+| `tmux-dev` | Opens or attaches to a tmux session named `dev` with two panes side by side. |
+| `tmux-agent` | Opens or attaches to a tmux session named `agent` with four panes in a tiled layout. |
 
 ```sh
 tmux-dev
 tmux-dev project-api
-```
-
-## `tmux-agent`
-
-Opens or attaches to a tmux session named `agent` with four panes in a tiled
-layout.
-
-```sh
 tmux-agent
 tmux-agent content-workflow
 ```
 
 ## Common tmux Commands
 
-```sh
-tmux
-tmux ls
-tmux attach
-tmux attach -t dev
-tmux new -s dev
-tmux kill-session
-tmux kill-session -t dev
-tmux kill-server
-exit
-```
+| Command | Purpose |
+| --- | --- |
+| `tmux` | Start a new session. |
+| `tmux ls` | List sessions. |
+| `tmux attach` | Attach to the latest session. |
+| `tmux attach -t dev` | Attach to a named session. |
+| `tmux new -s dev` | Create a named session. |
+| `tmux kill-session` | Close the current session. |
+| `tmux kill-session -t dev` | Close a named session. |
+| `tmux kill-server` | Close every tmux session. |
+| `exit` | Close the current shell or pane. |
 
-Use `tmux kill-session` to close the current session. Use `tmux kill-server`
-only when you want to close every tmux session at once.
+::: warning
+Use `tmux kill-server` only when you want to close every tmux session at once.
+:::
 
 ## Shell And Terminal Commands
 
-```sh
-source ~/.zshrc
-open -a WezTerm
-open -a WezTerm ~/Desktop
-```
+| Command | Purpose |
+| --- | --- |
+| `source ~/.zshrc` | Reload Zsh config after editing. |
+| `open -a WezTerm` | Open WezTerm from a shell. |
+| `open -a WezTerm ~/Desktop` | Open WezTerm in the Desktop folder. |
+| `command -v tmux-dev` | Check that local tmux commands are available. |
 
-Use `source ~/.zshrc` after editing the shell prompt. Use `open -a WezTerm` to
-open the terminal app from any shell.
+## Git Workflow Commands
+
+```sh
+cd ~/.config/dotfiles
+git status --short
+git diff
+git add -- <files>
+git commit -m "Update dotfiles"
+git push
+```

@@ -4,6 +4,11 @@ Neovim is a Vim-based text editor focused on extensibility, modern terminal
 features, Lua configuration, built-in LSP support, and plugin-driven workflows.
 In this setup it is the main terminal editor for editing code and dotfiles.
 
+::: tip Why it matters
+Neovim makes editing fast without leaving the terminal. This reduces context
+switching between terminal, editor, search tools, and Git workflows.
+:::
+
 ![Neovim showing the Snacks picker and WezTerm configuration](/images/apps/nvim-screenshot.png)
 
 Configuration file:
@@ -29,34 +34,69 @@ nvim/.config/nvim/init.lua
 | Project search | Uses Snacks picker for files, text, and buffers. |
 | Lua configuration | The setup lives in `init.lua` and is managed with `lazy.nvim`. |
 
+## Problems It Solves
+
+| Problem | Solution in this setup |
+| --- | --- |
+| Finding files manually is slow. | `Space f f` opens a file picker. |
+| Searching text from the shell breaks flow. | `Space f g` searches inside the project. |
+| Open buffers are hard to track. | Custom tabline plus `Space f b` make buffers visible and searchable. |
+| Editor setup is hard to reproduce. | The config is versioned in `nvim/.config/nvim/init.lua`. |
+
+## First Steps
+
+Open Neovim:
+
+```sh
+nvim
+```
+
+Open the dotfiles project:
+
+```sh
+cd ~/.config/dotfiles
+nvim .
+```
+
+Use these first:
+
+```text
+Space f f   find files
+Space f g   search text
+i           insert text
+Esc         return to normal mode
+:w          save
+:q          quit
+```
+
 ## Leader Key
 
 | Key | Meaning |
 | --- | --- |
 | `Space` | Leader key |
 
-## Uso Diario
+## Daily Usage
 
-| Comando | Accion |
+| Command | Action |
 | --- | --- |
-| `i` | Entrar en modo insertar antes del cursor |
-| `Esc` | Volver a modo normal |
-| `Space f f` | Buscar archivos |
-| `Space f g` | Buscar texto en el proyecto |
-| `Space f b` | Buscar buffers abiertos |
-| `:w` | Guardar |
-| `:q` | Salir de la ventana actual |
-| `:q!` | Salir sin guardar |
-| `:wq` | Guardar y salir |
-| `/texto` | Buscar `texto` hacia delante |
-| `n` | Ir al siguiente resultado de busqueda |
-| `N` | Ir al resultado anterior de busqueda |
-| `u` | Deshacer |
-| `Ctrl r` | Rehacer |
-| `dd` | Cortar/eliminar linea actual |
-| `yy` | Copiar linea actual |
-| `p` | Pegar despues del cursor |
-| `:bd` | Cerrar buffer actual |
+| `i` | Enter insert mode before the cursor |
+| `Esc` | Return to normal mode |
+| `Space f f` | Search files |
+| `Space f g` | Search text in the project |
+| `Space f b` | Search open buffers |
+| `:w` | Save |
+| `:q` | Quit the current window |
+| `:q!` | Quit without saving |
+| `:wq` | Save and quit |
+| `/text` | Search forward for `text` |
+| `n` | Go to the next search result |
+| `N` | Go to the previous search result |
+| `u` | Undo |
+| `Ctrl r` | Redo |
+| `dd` | Delete current line |
+| `yy` | Copy current line |
+| `p` | Paste after the cursor |
+| `:bd` | Close current buffer |
 
 ## Custom Shortcuts
 
@@ -137,3 +177,8 @@ nvim/.config/nvim/init.lua
 
 The tabline shows listed buffers, not Vim tabs. Modified buffers get a `+`
 marker in the tab title.
+
+::: info Vim modes
+Neovim is modal. Most commands run from normal mode. If a shortcut does not
+work, press `Esc` first and try again.
+:::
