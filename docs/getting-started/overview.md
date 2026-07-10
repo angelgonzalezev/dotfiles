@@ -9,6 +9,7 @@ easy to reproduce on a new machine.
 | --- | --- | --- |
 | Neovim | `nvim` | `~/.config/nvim` |
 | WezTerm | `wezterm` | `~/.config/wezterm` |
+| tmux | `tmux` | `~/.tmux.conf`, `~/.local/bin/tmux-*` |
 
 ## How It Works
 
@@ -18,6 +19,8 @@ The repo uses GNU Stow. Each package mirrors the path it should have from
 ```text
 nvim/.config/nvim/
 wezterm/.config/wezterm/
+tmux/.tmux.conf
+tmux/.local/bin/
 ```
 
 When installed, Stow creates symlinks from your home directory to this repo.

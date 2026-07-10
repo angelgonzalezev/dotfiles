@@ -18,23 +18,29 @@ Install only WezTerm:
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- wezterm
 ```
 
+Install only tmux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux
+```
+
 ## What The Bootstrap Does
 
 1. Checks that `git` exists.
 2. Installs `stow` with Homebrew if it is missing.
 3. Clones or updates the repo at `~/.config/dotfiles`.
-4. Backs up existing config folders.
+4. Backs up existing config files and folders.
 5. Links the selected packages into `$HOME`.
 
 ## Backups
 
-Existing folders are moved to:
+Existing files and folders are moved to:
 
 ```text
 ~/.config/dotfiles-backups/
 ```
 
-The bootstrap does not delete existing config folders.
+The bootstrap does not delete existing config files or folders.
 
 ## Manual Install
 

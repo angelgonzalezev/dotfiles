@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+session="${1:-agent}"
+start_dir="${2:-$PWD}"
+
+if tmux has-session -t "$session" 2>/dev/null; then
+  if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$session"
+  else
+    tmux attach-session -t "$session"
+  fi
+  exit 0
+fi
+
+left_pane="$(tmux new-session -d -P -F "#{pane_id}" -s "$session" -c "$start_dir")"
+right_pane="$(tmux split-window -h -P -F "#{pane_id}" -t "$left_pane" -c "$start_dir")"
+tmux split-window -v -t "$left_pane" -c "$start_dir"
+tmux split-window -v -t "$right_pane" -c "$start_dir"
+tmux select-layout -t "$session:1" tiled
+tmux select-pane -t "$left_pane"
+
+if [ -n "${TMUX:-}" ]; then
+  tmux switch-client -t "$session"
+else
+  tmux attach-session -t "$session"
+fi

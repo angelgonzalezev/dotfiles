@@ -20,6 +20,12 @@ nvim/
 wezterm/
   .config/
     wezterm/
+tmux/
+  .tmux.conf
+  .local/
+    bin/
+      tmux-agent
+      tmux-dev
 bin/
   bootstrap
   dotfiles-doctor
@@ -34,6 +40,7 @@ bin/
 - [Install](docs/getting-started/install.md)
 - [Neovim](docs/apps/nvim.md)
 - [WezTerm](docs/apps/wezterm.md)
+- [tmux](docs/apps/tmux.md)
 
 ## Install
 
@@ -48,6 +55,7 @@ To install only one package:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- nvim
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- wezterm
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux
 ```
 
 Existing config folders are backed up automatically to:
@@ -91,6 +99,8 @@ This links:
 ```text
 ~/.config/nvim    -> ~/.config/dotfiles/nvim/.config/nvim
 ~/.config/wezterm -> ~/.config/dotfiles/wezterm/.config/wezterm
+~/.tmux.conf      -> ~/.config/dotfiles/tmux/.tmux.conf
+~/.local/bin/*    -> ~/.config/dotfiles/tmux/.local/bin/*
 ```
 
 If config folders already exist, back them up before installing:
@@ -98,6 +108,7 @@ If config folders already exist, back them up before installing:
 ```sh
 mv ~/.config/nvim ~/.config/nvim.backup
 mv ~/.config/wezterm ~/.config/wezterm.backup
+mv ~/.tmux.conf ~/.tmux.conf.backup
 bin/dotfiles-install
 ```
 
@@ -106,6 +117,14 @@ To install only one package:
 ```sh
 bin/dotfiles-install nvim
 bin/dotfiles-install wezterm
+bin/dotfiles-install tmux
+```
+
+tmux also installs two workspace commands:
+
+```sh
+tmux-dev
+tmux-agent
 ```
 
 ## Contributing

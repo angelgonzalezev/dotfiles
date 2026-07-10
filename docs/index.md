@@ -32,6 +32,7 @@ to keep development faster, clearer, and easier to maintain.
 | --- | --- |
 | [Neovim](apps/nvim.md) | Keyboard shortcuts, plugins, and UI notes. |
 | [WezTerm](apps/wezterm.md) | Keyboard shortcuts, panes, tabs, and UI notes. |
+| [tmux](apps/tmux.md) | Session management, panes, and terminal workflow. |
 
 ## Reference
 

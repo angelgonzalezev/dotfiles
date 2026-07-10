@@ -11,7 +11,7 @@ fi
 
 packages=("$@")
 if [ "${#packages[@]}" -eq 0 ]; then
-  packages=(nvim wezterm)
+  packages=(nvim wezterm tmux)
 fi
 
 stow --target="$HOME" "${packages[@]}"

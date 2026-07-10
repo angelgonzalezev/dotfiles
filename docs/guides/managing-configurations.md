@@ -29,6 +29,7 @@ From the repo root:
 ```sh
 bin/dotfiles-install nvim
 bin/dotfiles-install wezterm
+bin/dotfiles-install tmux
 ```
 
 ## Remove A Package

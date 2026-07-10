@@ -39,7 +39,8 @@ export default defineConfig({
         text: 'Apps',
         items: [
           { text: 'Neovim', link: '/apps/nvim' },
-          { text: 'WezTerm', link: '/apps/wezterm' }
+          { text: 'WezTerm', link: '/apps/wezterm' },
+          { text: 'tmux', link: '/apps/tmux' }
         ]
       },
       {

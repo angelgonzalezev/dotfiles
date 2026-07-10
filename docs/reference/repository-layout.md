@@ -15,8 +15,13 @@
 |   `-- reference/
 |-- nvim/
 |   `-- .config/nvim/
-`-- wezterm/
-    `-- .config/wezterm/
+|-- wezterm/
+|   `-- .config/wezterm/
+`-- tmux/
+    |-- .tmux.conf
+    `-- .local/bin/
+        |-- tmux-agent
+        `-- tmux-dev
 ```
 
 ## Packages
@@ -27,3 +32,6 @@ Packages are top-level folders that Stow can link into `$HOME`.
 | --- | --- | --- |
 | `nvim` | `nvim/.config/nvim` | `~/.config/nvim` |
 | `wezterm` | `wezterm/.config/wezterm` | `~/.config/wezterm` |
+| `tmux` | `tmux/.tmux.conf` | `~/.tmux.conf` |
+| `tmux` | `tmux/.local/bin/tmux-dev` | `~/.local/bin/tmux-dev` |
+| `tmux` | `tmux/.local/bin/tmux-agent` | `~/.local/bin/tmux-agent` |

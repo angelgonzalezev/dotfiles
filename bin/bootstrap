@@ -7,7 +7,7 @@ backup_root="${DOTFILES_BACKUP_DIR:-$HOME/.config/dotfiles-backups}"
 packages=("$@")
 
 if [ "${#packages[@]}" -eq 0 ]; then
-  packages=(nvim wezterm)
+  packages=(nvim wezterm tmux)
 fi
 
 log() {
@@ -54,10 +54,19 @@ clone_or_update_repo() {
   git clone "$repo_url" "$repo_dir"
 }
 
-target_for_package() {
+targets_for_package() {
   case "$1" in
-    nvim) printf '%s\n' "$HOME/.config/nvim" ;;
-    wezterm) printf '%s\n' "$HOME/.config/wezterm" ;;
+    nvim)
+      printf '%s\n' "$HOME/.config/nvim"
+      ;;
+    wezterm)
+      printf '%s\n' "$HOME/.config/wezterm"
+      ;;
+    tmux)
+      printf '%s\n' "$HOME/.tmux.conf"
+      printf '%s\n' "$HOME/.local/bin/tmux-dev"
+      printf '%s\n' "$HOME/.local/bin/tmux-agent"
+      ;;
     *)
       log "unknown package: $1"
       exit 1
@@ -65,31 +74,90 @@ target_for_package() {
   esac
 }
 
-source_for_package() {
-  printf '%s\n' "$repo_dir/$1/.config/$1"
+source_for_target() {
+  case "$1" in
+    nvim) printf '%s\n' "$repo_dir/nvim/.config/nvim" ;;
+    wezterm) printf '%s\n' "$repo_dir/wezterm/.config/wezterm" ;;
+    tmux)
+      case "$2" in
+        "$HOME/.tmux.conf") printf '%s\n' "$repo_dir/tmux/.tmux.conf" ;;
+        "$HOME/.local/bin/tmux-dev") printf '%s\n' "$repo_dir/tmux/.local/bin/tmux-dev" ;;
+        "$HOME/.local/bin/tmux-agent") printf '%s\n' "$repo_dir/tmux/.local/bin/tmux-agent" ;;
+        *)
+          log "unknown tmux target: $2"
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      log "unknown package: $1"
+      exit 1
+      ;;
+  esac
+}
+
+backup_path_for_target() {
+  case "$1" in
+    nvim) printf '%s\n' "$backup_root/$2/.config/nvim" ;;
+    wezterm) printf '%s\n' "$backup_root/$2/.config/wezterm" ;;
+    tmux)
+      case "$3" in
+        "$HOME/.tmux.conf") printf '%s\n' "$backup_root/$2/.tmux.conf" ;;
+        "$HOME/.local/bin/tmux-dev") printf '%s\n' "$backup_root/$2/.local/bin/tmux-dev" ;;
+        "$HOME/.local/bin/tmux-agent") printf '%s\n' "$backup_root/$2/.local/bin/tmux-agent" ;;
+        *)
+          log "unknown tmux target: $3"
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      log "unknown package: $1"
+      exit 1
+      ;;
+  esac
+}
+
+resolve_path() {
+  local path link dir base
+  path="$1"
+
+  if [ -L "$path" ]; then
+    link="$(readlink "$path")"
+    if [[ "$link" = /* ]]; then
+      path="$link"
+    else
+      path="$(dirname "$path")/$link"
+    fi
+  fi
+
+  dir="$(dirname "$path")"
+  base="$(basename "$path")"
+  printf '%s/%s\n' "$(cd "$dir" && pwd -P)" "$base"
 }
 
 backup_existing_targets() {
-  local timestamp backup_dir package target source
+  local timestamp package target source backup_path
   timestamp="$(date +%Y%m%d-%H%M%S)"
-  backup_dir="$backup_root/$timestamp"
 
   for package in "${packages[@]}"; do
-    target="$(target_for_package "$package")"
-    source="$(source_for_package "$package")"
+    while IFS= read -r target; do
+      source="$(source_for_target "$package" "$target")"
+      backup_path="$(backup_path_for_target "$package" "$timestamp" "$target")"
 
-    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-      continue
-    fi
+      if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+        continue
+      fi
 
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
-      log "already linked: $target"
-      continue
-    fi
+      if [ -L "$target" ] && [ "$(resolve_path "$target")" = "$(resolve_path "$source")" ]; then
+        log "already linked: $target"
+        continue
+      fi
 
-    mkdir -p "$backup_dir/.config"
-    log "backing up $target to $backup_dir/.config/$package"
-    mv "$target" "$backup_dir/.config/$package"
+      mkdir -p "$(dirname "$backup_path")"
+      log "backing up $target to $backup_path"
+      mv "$target" "$backup_path"
+    done < <(targets_for_package "$package")
   done
 }
 
@@ -98,7 +166,7 @@ validate_packages() {
 
   for package in "${packages[@]}"; do
     case "$package" in
-      nvim|wezterm) ;;
+      nvim|wezterm|tmux) ;;
       *)
         log "unknown package: $package"
         exit 1

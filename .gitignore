@@ -31,6 +31,7 @@ __pycache__/
 .Trash/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+.tmp-tmux/
 
 # Tool-specific state that should not be mirrored into this repo.
 gcloud/
