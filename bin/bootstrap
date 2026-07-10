@@ -97,7 +97,13 @@ validate_packages() {
   local package
 
   for package in "${packages[@]}"; do
-    target_for_package "$package" >/dev/null
+    case "$package" in
+      nvim|wezterm) ;;
+      *)
+        log "unknown package: $package"
+        exit 1
+        ;;
+    esac
   done
 }
 
