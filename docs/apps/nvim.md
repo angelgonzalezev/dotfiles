@@ -17,6 +17,15 @@ Configuration file:
 nvim/.config/nvim/init.lua
 ```
 
+Requirements:
+
+```text
+Neovim 0.10 or newer
+Git for lazy.nvim plugin installation
+ripgrep for Space f g
+JetBrainsMono Nerd Font for icons
+```
+
 ## Official Resources
 
 | Resource | URL |
@@ -106,6 +115,28 @@ Esc         return to normal mode
 | `Space f g` | Normal | Search text with Snacks grep |
 | `Space f b` | Normal | Search open buffers with Snacks picker |
 
+These are the only custom Neovim key mappings currently defined by this
+project. The remaining commands on this page are standard Neovim commands or
+defaults provided by the installed plugins.
+
+### Using The Pickers
+
+1. Press `Esc` to make sure Neovim is in normal mode.
+2. Open a picker with `Space f f`, `Space f g`, or `Space f b`.
+3. Type to filter the results.
+4. Move through the list with the arrow keys.
+5. Press `Enter` to open the selected result.
+6. Press `Esc` to close the picker without selecting anything.
+
+`Space f g` searches file contents from the current working directory. Start
+Neovim from the project root when you want the search to cover the whole
+project:
+
+```sh
+cd path/to/project
+nvim .
+```
+
 ## Common Shortcuts
 
 ### Modes
@@ -163,6 +194,45 @@ Esc         return to normal mode
 | Statusline | Lualine |
 | Tabline | Custom WezTerm-style buffer tabline |
 
+## Configured Editor Behavior
+
+| Option | Value | Effect |
+| --- | --- | --- |
+| Leader key | `Space` | Starts project-specific shortcuts. |
+| Line numbers | Absolute and relative | The current line shows its number; other lines show jump distance. |
+| Mouse | Enabled | Allows selection, scrolling, and clicking UI elements. |
+| True color | Enabled | Lets Catppuccin render its full terminal palette. |
+| Search case | Smart | Lowercase searches ignore case; uppercase searches become case-sensitive. |
+| Cursor line | Enabled | Highlights the row containing the cursor. |
+| Sign column | Always visible | Prevents text shifting when diagnostics or Git signs appear. |
+| Statusline | One global line | Lualine spans the complete Neovim window. |
+| Tabline | Always visible | Open listed buffers remain visible at the top. |
+| Command height | `0` | Hides the command area until Neovim needs it. |
+| Popup transparency | `12` | Slightly blends completion and popup menus with the terminal. |
+
+The custom fill characters replace default separators with Powerline and box
+drawing glyphs. They require the Nerd Font configured in WezTerm.
+
+## Statusline And Buffer Line
+
+The bottom Lualine statusline displays:
+
+| Position | Information |
+| --- | --- |
+| Left | Current mode, Git branch, and Git diff summary. |
+| Centre | File path and modified/read-only state. |
+| Right | Diagnostics, file type, progress through the file, and cursor location. |
+
+The top line is a list of buffers, not Vim tab pages. Each item shows a
+one-based index and filename. The current buffer is lavender, inactive buffers
+are dark, and unsaved buffers include `+`.
+
+::: info Buffers, windows, and tabs
+A buffer is an open file. A window is a viewport showing a buffer. A Vim tab is
+a collection of windows. This setup deliberately uses the top line for buffers
+because that maps more closely to the tabs people expect from other editors.
+:::
+
 ## Plugins
 
 | Plugin | Purpose |
@@ -173,10 +243,34 @@ Esc         return to normal mode
 | `folke/snacks.nvim` | Picker and search UI |
 | `nvim-lualine/lualine.nvim` | Statusline |
 
+Plugin versions are pinned in `nvim/.config/nvim/lazy-lock.json`. This makes a
+new installation reproduce the tested plugin revisions rather than silently
+using unrelated newer versions.
+
+Useful plugin maintenance commands:
+
+| Command | Purpose |
+| --- | --- |
+| `:Lazy` | Open the lazy.nvim plugin manager. |
+| `:Lazy sync` | Install missing plugins, update, and remove unused plugins. |
+| `:Lazy restore` | Return plugins to the revisions in `lazy-lock.json`. |
+| `:checkhealth` | Run Neovim and plugin diagnostics. |
+
+## What Is Not Configured
+
+This repository does not currently configure language servers, completion
+engines, formatters, debuggers, or Treesitter parsers. The editor provides the
+documented navigation, search, theme, buffers, and statusline without assuming
+a particular programming language.
+
 ## Notes
 
 The tabline shows listed buffers, not Vim tabs. Modified buffers get a `+`
 marker in the tab title.
+
+On first launch, `lazy.nvim` is cloned and installs the versions pinned in
+`lazy-lock.json`. This requires internet access. Run `:checkhealth` if plugins
+do not load, and confirm `rg --version` if project grep fails.
 
 ::: info Vim modes
 Neovim is modal. Most commands run from normal mode. If a shortcut does not

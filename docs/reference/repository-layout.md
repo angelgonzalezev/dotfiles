@@ -10,6 +10,8 @@ relative to `$HOME`.
 |   |-- bootstrap
 |   |-- dotfiles-doctor
 |   |-- dotfiles-install
+|   |-- dotfiles-restore
+|   |-- dotfiles-check
 |   |-- dotfiles-status
 |   `-- dotfiles-sync
 |-- docs/
@@ -25,7 +27,10 @@ relative to `$HOME`.
 |   |-- .tmux.conf
 |   `-- .local/bin/
 |       |-- tmux-agent
-|       `-- tmux-dev
+|       |-- tmux-dev
+|       `-- tmux-status
+|-- tests/
+|   `-- install-restore.sh
 `-- zsh/
     `-- .zshrc
 ```
@@ -41,6 +46,7 @@ Packages are top-level folders that Stow can link into `$HOME`.
 | `tmux` | `tmux/.tmux.conf` | `~/.tmux.conf` |
 | `tmux` | `tmux/.local/bin/tmux-dev` | `~/.local/bin/tmux-dev` |
 | `tmux` | `tmux/.local/bin/tmux-agent` | `~/.local/bin/tmux-agent` |
+| `tmux` | `tmux/.local/bin/tmux-status` | `~/.local/bin/tmux-status` |
 | `zsh` | `zsh/.zshrc` | `~/.zshrc` |
 
 ## Scripts
@@ -49,6 +55,8 @@ Packages are top-level folders that Stow can link into `$HOME`.
 | --- | --- |
 | `bin/bootstrap` | Full installer: dependencies, backups, repo update, and Stow links. |
 | `bin/dotfiles-install` | Links packages into `$HOME` with Stow. |
+| `bin/dotfiles-restore` | Restores configuration from an installation manifest. |
+| `bin/dotfiles-check` | Runs the local validation suite used by CI. |
 | `bin/dotfiles-doctor` | Checks for common repo issues before publishing. |
 | `bin/dotfiles-status` | Shows compact Git status. |
 | `bin/dotfiles-sync` | Prints the manual sync flow. |
@@ -72,3 +80,9 @@ local databases
 The VitePress source files live in `docs/`. The built output under
 `docs/.vitepress/dist/` can be recreated with `npm run docs:build`.
 :::
+
+## Installation State
+
+Installation records do not live in the repository. By default they are stored
+under `~/.config/dotfiles-backups/<timestamp>/` with a manifest and status file.
+This keeps machine-specific paths and previous private configuration out of Git.

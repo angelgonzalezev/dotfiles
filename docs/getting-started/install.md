@@ -1,246 +1,194 @@
 # Install
 
-This page explains exactly how to install the project, what each mode does, and
-what can change on your machine.
+This guide explains the supported systems, every installation mode, what the
+installer changes, and how to recover if the result is not right for you.
 
-::: warning Review before installing
-Dotfiles affect your shell, terminal, editor, and tmux workflow. The installer
-backs up existing files before replacing them with symlinks, but you should
-still read this page before running it on a machine with important local config.
+::: warning Read before running remote scripts
+The bootstrap can install software and replace terminal configuration with
+symlinks. Read the prompts and review the
+[restore guide](/guides/backups-and-restore) before using automatic mode.
 :::
 
-## Installation Layers
+## Supported Systems
 
-This project has two installation layers:
-
-| Layer | Command | Purpose |
+| System | Support | Dependency manager |
 | --- | --- | --- |
-| Bootstrap | `bin/bootstrap` | Installs optional apps/tools, clones or updates the repo, backs up existing files, and links packages. |
-| Stow install | `bin/dotfiles-install` | Only links selected dotfiles packages into `$HOME`. |
+| macOS | Fully supported and tested | Homebrew |
+| Ubuntu 22.04/24.04 | Fully supported and tested | APT plus official releases when needed |
+| Debian 12/13 | Supported | APT plus official releases when needed |
+| Other Linux distributions | Config linking only | Install dependencies manually |
 
-Use `bootstrap` on a new machine. Use `dotfiles-install` when the repo already
-exists locally and you only want to relink configuration files.
+The installer supports Intel/AMD 64-bit and ARM64 machines. Windows is not
+currently supported.
 
-## Recommended Path
+## Recommended Interactive Install
 
-For a new user, the clearest path is a single remote command:
-
-1. Run the interactive install command.
-2. Answer each install question.
-3. Let the bootstrap clone the repo into `~/.config/dotfiles`.
-4. Open a new terminal.
-5. Check the installed commands.
+Run this from any directory:
 
 ```sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
-The installer will ask:
+The script asks before each group of changes:
 
 ```text
-Install CLI tools with Homebrew (stow, neovim, tmux)? [y/N]
-Install WezTerm with Homebrew Cask? [y/N]
+Install CLI tools (stow, Neovim, tmux, ripgrep and Zsh)? [y/N]
+Install WezTerm? [y/N]
+Install JetBrainsMono Nerd Font? [y/N]
 Install Oh My Zsh? [y/N]
 Install zsh-autosuggestions? [y/N]
 Install dotfiles packages (nvim wezterm tmux zsh)? [y/N]
 ```
 
-::: tip Recommended answers for a fresh Mac
-Answer `y` to every prompt if you want the complete workflow: editor, terminal,
-tmux, shell prompt, suggestions, and linked config files.
-:::
-
-## Quick Install
-
-Install the default configuration packages from any terminal:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
-```
-
-This mode is intentionally conservative. Because the script is streamed through
-standard input, it cannot reliably ask interactive questions. It installs the
-default dotfiles packages and only installs `stow` if it is missing.
-
-::: info Why this mode does not ask questions
-`curl | bash` uses standard input to feed the script into Bash. Interactive
-questions also need standard input. To avoid confusing behavior, the installer
-only asks questions when it is run from a local file in a normal terminal.
-:::
-
-## Why Interactive Install Uses `bash -c`
-
-The interactive command uses this shape:
-
-```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
-```
-
-This downloads the script first and passes it to Bash as a command string. That
-leaves standard input available for prompts, so the installer can ask questions.
+Answer `y` to all prompts for the complete environment. On Linux, package
+installation may request your `sudo` password. The installer does not change
+your default login shell automatically.
 
 ## Automatic Install
 
-Run every install step without prompts:
+Install every supported dependency and configuration without questions:
 
 ```sh
 DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
-This mode can install:
+Use this only when you accept all the changes listed below.
 
-```text
-Homebrew
-stow
-neovim
-tmux
-WezTerm
-Oh My Zsh
-zsh-autosuggestions
-dotfiles packages
+## Config-Only Install
+
+Streaming a script through standard input leaves no input available for
+questions. This form installs selected configurations and Stow if required,
+but skips optional application groups:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
 ```
 
-Use it only when you are comfortable with the installer making all supported
-changes.
+## Select Packages
 
-## Package Selection
-
-Install only Neovim:
+Available packages are `nvim`, `wezterm`, `tmux`, and `zsh`.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- nvim
+curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux zsh
 ```
 
-Install only WezTerm:
+Use selected packages with interactive dependency prompts:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- wezterm
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- nvim tmux
 ```
 
-Install only tmux:
+Unknown package names are rejected before any files are changed.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux
-```
+## What Gets Installed
 
-Install only Zsh:
+| Dependency | Why it is needed |
+| --- | --- |
+| Git and curl | Download the repository, plugins, and official installers. |
+| GNU Stow | Create and remove managed symlinks. |
+| Neovim 0.10+ | Run the Lua editor configuration and current plugins. |
+| ripgrep | Power `Space f g` project search in Neovim. |
+| tmux | Persistent sessions, windows, panes, and predefined layouts. |
+| Zsh | Run the shared shell configuration. |
+| WezTerm | Provide the configured terminal interface. |
+| JetBrainsMono Nerd Font | Render text and status icons correctly. |
+| Oh My Zsh | Provide the prompt theme and plugin framework. |
+| zsh-autosuggestions | Suggest commands from shell history. |
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- zsh
-```
+On macOS, Homebrew is installed when required and activated immediately with
+`brew shellenv`. On Ubuntu/Debian, old distribution versions of Neovim are
+replaced by an official current release under `~/.local/opt/nvim`.
 
-Run selected packages remotely with interactive prompts:
-
-```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- nvim tmux zsh
-```
+WezTerm on Ubuntu/Debian is installed from its official APT repository. The
+Nerd Font is installed in the user font directory, not system-wide.
 
 ## What Gets Linked
 
-When all packages are selected, these links are created:
+Stow uses `--no-folding`, so directories remain real directories and the
+managed files inside them are symlinks:
 
 ```text
-~/.config/nvim/init.lua           -> ~/.config/dotfiles/nvim/.config/nvim/init.lua
-~/.config/wezterm/wezterm.lua     -> ~/.config/dotfiles/wezterm/.config/wezterm/wezterm.lua
-~/.tmux.conf                      -> ~/.config/dotfiles/tmux/.tmux.conf
-~/.local/bin/tmux-dev             -> ~/.config/dotfiles/tmux/.local/bin/tmux-dev
-~/.local/bin/tmux-agent           -> ~/.config/dotfiles/tmux/.local/bin/tmux-agent
-~/.zshrc                          -> ~/.config/dotfiles/zsh/.zshrc
+~/.config/nvim/init.lua       -> <repo>/nvim/.config/nvim/init.lua
+~/.config/nvim/lazy-lock.json -> <repo>/nvim/.config/nvim/lazy-lock.json
+~/.config/wezterm/wezterm.lua -> <repo>/wezterm/.config/wezterm/wezterm.lua
+~/.tmux.conf                  -> <repo>/tmux/.tmux.conf
+~/.local/bin/tmux-dev         -> <repo>/tmux/.local/bin/tmux-dev
+~/.local/bin/tmux-agent       -> <repo>/tmux/.local/bin/tmux-agent
+~/.local/bin/tmux-status      -> <repo>/tmux/.local/bin/tmux-status
+~/.zshrc                      -> <repo>/zsh/.zshrc
 ```
 
-## What The Bootstrap Does
+## What Each Package Configures
 
-1. Checks that `git` exists.
-2. Asks which optional apps/tools to install when running interactively.
-3. Installs selected dependencies.
-4. Installs `stow` if config packages are selected and `stow` is missing.
-5. Clones or updates the repo at `~/.config/dotfiles`.
-6. Backs up existing config files and folders.
-7. Links the selected packages into `$HOME`.
-
-## Installed Dependencies
-
-When selected interactively, bootstrap can install:
-
-| Dependency | Method | Used by |
-| --- | --- | --- |
-| Homebrew | Official installer | Package manager for macOS dependencies. |
-| `stow` | `brew install stow` | Symlink management. |
-| `neovim` | `brew install neovim` | Neovim config. |
-| `tmux` | `brew install tmux` | tmux config and workspace scripts. |
-| WezTerm | `brew install --cask wezterm` | Terminal app. |
-| Oh My Zsh | Official install script | Zsh prompt and plugin framework. |
-| `zsh-autosuggestions` | Git clone into Oh My Zsh custom plugins | Shell suggestions. |
-
-## Backups
-
-Existing files and folders are moved to:
-
-```text
-~/.config/dotfiles-backups/<timestamp>/
-```
-
-The bootstrap does not delete existing config files or folders.
-
-Example backup paths:
-
-```text
-~/.config/dotfiles-backups/<timestamp>/.config/nvim
-~/.config/dotfiles-backups/<timestamp>/.config/wezterm
-~/.config/dotfiles-backups/<timestamp>/.tmux.conf
-~/.config/dotfiles-backups/<timestamp>/.local/bin/tmux-dev
-~/.config/dotfiles-backups/<timestamp>/.local/bin/tmux-agent
-~/.config/dotfiles-backups/<timestamp>/.zshrc
-```
-
-::: warning Existing `.zshrc`
-If you already have a large `.zshrc`, move machine-specific SDK paths, tokens,
-and generated exports into `~/.zshrc.local` before installing the `zsh` package.
-The tracked `.zshrc` loads `~/.zshrc.local` automatically.
-:::
-
-## Environment Variables
-
-| Variable | Use |
+| Package | User-visible result |
 | --- | --- |
-| `DOTFILES_REPO_URL` | Override the Git repository URL. |
-| `DOTFILES_DIR` | Override where the repo is cloned or updated. |
-| `DOTFILES_BACKUP_DIR` | Override where existing files are backed up. |
-| `DOTFILES_ASSUME_YES=1` | Accept every install prompt automatically. |
+| `nvim` | Editor appearance, search shortcuts, plugin manager, statusline, and open-buffer line. |
+| `wezterm` | Terminal font, colors, opacity, padding, title buttons, tab appearance, and custom tab navigation. |
+| `tmux` | Prefix, panes, windows, copy mode, status bar, and the `tmux-dev`, `tmux-agent`, and `tmux-status` commands. |
+| `zsh` | Prompt, history, Git integration, suggestions, `PATH`, Homebrew activation, and private local override loading. |
 
-Example:
+Installing a configuration package does not imply that its application is
+installed. Choose the dependency prompts on a new machine, or install the apps
+manually before using config-only mode.
 
-```sh
-DOTFILES_DIR="$HOME/dev/dotfiles" bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+## Safety And Idempotency
+
+Before linking anything, bootstrap:
+
+1. Validates package names and required commands.
+2. Clones or fast-forwards the repository.
+3. Creates a timestamped installation record.
+4. Detects paths already linked to this repository.
+5. Moves conflicting user configuration into the backup.
+6. Simulates Stow before making changes.
+7. Links all selected packages.
+8. Rolls moved files back automatically if linking fails.
+
+Running bootstrap again does not back up correctly managed links as if they
+were user files. It records them as `managed` and leaves them in place.
+
+## Installation Records
+
+Every config installation creates:
+
+```text
+~/.config/dotfiles-backups/<timestamp>/manifest.tsv
+~/.config/dotfiles-backups/<timestamp>/status
+~/.config/dotfiles-backups/latest
 ```
 
-## Verify The Install
+The manifest records `absent`, `managed`, or `moved` for each target. `latest`
+contains the most recent successful installation that actually changed a
+target. An idempotent reinstall does not replace the previous restore point.
 
-After installation, run:
+At the end, bootstrap prints the exact restore command for that run.
 
-```sh
-ls -la ~/.zshrc
-ls -la ~/.tmux.conf
-command -v tmux-dev
-command -v tmux-agent
-```
+## Custom Locations
 
-You can also run the project doctor:
-
-```sh
-cd ~/.config/dotfiles
-bin/dotfiles-doctor
-```
-
-## Relink After Installation
-
-After bootstrap runs once, the repo exists at `~/.config/dotfiles`. From that
-point, you can relink config files without downloading the installer again.
-
-This only links config files. It does not install apps or optional dependencies.
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DOTFILES_REPO_URL` | GitHub repository | Use a fork or local Git repository. |
+| `DOTFILES_DIR` | `~/.config/dotfiles` | Choose where the repo is stored. |
+| `DOTFILES_BACKUP_DIR` | `~/.config/dotfiles-backups` | Choose where installation records live. |
+| `DOTFILES_ASSUME_YES=1` | `0` | Accept all dependency and config prompts. |
 
 ```sh
-brew install stow
-cd ~/.config/dotfiles
-bin/dotfiles-install
+DOTFILES_DIR="$HOME/dev/dotfiles" DOTFILES_BACKUP_DIR="$HOME/dotfiles-backups" bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
+
+## Verify Installation
+
+Open a new shell, then run:
+
+```sh
+~/.config/dotfiles/bin/dotfiles-doctor
+command -v nvim tmux rg wezterm tmux-dev tmux-agent tmux-status
+```
+
+If the repository uses a custom location, run its `bin/dotfiles-doctor`.
+
+::: tip Next steps
+Continue with the [daily workflow](/getting-started/daily-workflow), or open
+[troubleshooting](/guides/troubleshooting) if any check fails.
+:::

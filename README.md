@@ -8,8 +8,9 @@ under MIT. See [LICENSE](LICENSE).
 
 ## What This Project Is
 
-This is an open source dotfiles repository. It stores the configuration for the
-tools I use to work in the terminal: Neovim, WezTerm, tmux, and Zsh.
+This is an open source dotfiles repository for macOS and Ubuntu/Debian. It
+stores the configuration for the tools I use to work in the terminal: Neovim,
+WezTerm, tmux, and Zsh.
 
 The goal is to make a development machine reproducible. Instead of configuring
 every app manually on every computer, the configuration lives in Git, can be
@@ -19,7 +20,7 @@ installed with scripts, and is documented in one place.
 
 | Problem | Solution |
 | --- | --- |
-| Setting up a new Mac takes too long. | Bootstrap can install tools and link config files. |
+| Setting up a new machine takes too long. | Bootstrap can install tools and link config files on supported macOS and Linux systems. |
 | Terminal shortcuts are easy to forget. | The docs explain the commands used daily. |
 | Config files drift between machines. | Shared config is versioned and symlinked with Stow. |
 | Local machine config can leak into Git. | Local-only shell config lives in `~/.zshrc.local`. |
@@ -29,7 +30,7 @@ installed with scripts, and is documented in one place.
 
 | Package | Installs config for | Main benefit |
 | --- | --- | --- |
-| `nvim` | Neovim | Keyboard-first editor with project search and plugins. |
+| `nvim` | Neovim 0.10+ and ripgrep | Keyboard-first editor with project search and plugins. |
 | `wezterm` | WezTerm | Terminal UI, tabs, theme, font, and navigation. |
 | `tmux` | tmux | Persistent sessions, panes, and workspace layout commands. |
 | `zsh` | Zsh / Oh My Zsh | Prompt, history, suggestions, and local command path. |
@@ -42,8 +43,8 @@ Run the interactive installer from any terminal:
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
-The installer can ask before installing CLI tools, WezTerm, Oh My Zsh,
-`zsh-autosuggestions`, and the selected dotfiles packages.
+The installer can ask before installing CLI tools, WezTerm, JetBrainsMono Nerd
+Font, Oh My Zsh, `zsh-autosuggestions`, and selected dotfiles packages.
 
 Install the default configuration packages without interactive prompts:
 
@@ -72,6 +73,15 @@ Existing config files are backed up automatically to:
 ~/.config/dotfiles-backups/
 ```
 
+Restore the previous configuration at any time:
+
+```sh
+~/.config/dotfiles/bin/dotfiles-restore --backup latest
+```
+
+See the [complete install guide](docs/getting-started/install.md) for supported
+systems, dependencies, safety behavior, and verification.
+
 ## Documentation
 
 Start here:
@@ -83,6 +93,7 @@ Start here:
 
 Apps:
 
+- [GNU Stow](docs/apps/stow.md)
 - [Neovim](docs/apps/nvim.md)
 - [WezTerm](docs/apps/wezterm.md)
 - [tmux](docs/apps/tmux.md)
@@ -91,6 +102,7 @@ Apps:
 Guides:
 
 - [Backups and Restore](docs/guides/backups-and-restore.md)
+- [Troubleshooting](docs/guides/troubleshooting.md)
 - [Managing Configurations](docs/guides/managing-configurations.md)
 - [macOS Terminal Shortcut](docs/guides/macos-terminal-shortcut.md)
 
@@ -112,12 +124,15 @@ tmux/
     bin/
       tmux-agent
       tmux-dev
+      tmux-status
 zsh/
   .zshrc
 bin/
   bootstrap
+  dotfiles-check
   dotfiles-doctor
   dotfiles-install
+  dotfiles-restore
   dotfiles-status
   dotfiles-sync
 ```
@@ -136,11 +151,11 @@ bin/dotfiles-install
 This links:
 
 ```text
-~/.config/nvim    -> ~/.config/dotfiles/nvim/.config/nvim
-~/.config/wezterm -> ~/.config/dotfiles/wezterm/.config/wezterm
-~/.tmux.conf      -> ~/.config/dotfiles/tmux/.tmux.conf
-~/.local/bin/*    -> ~/.config/dotfiles/tmux/.local/bin/*
-~/.zshrc          -> ~/.config/dotfiles/zsh/.zshrc
+~/.config/nvim/init.lua       -> ~/.config/dotfiles/nvim/.config/nvim/init.lua
+~/.config/wezterm/wezterm.lua -> ~/.config/dotfiles/wezterm/.config/wezterm/wezterm.lua
+~/.tmux.conf                  -> ~/.config/dotfiles/tmux/.tmux.conf
+~/.local/bin/tmux-*           -> ~/.config/dotfiles/tmux/.local/bin/tmux-*
+~/.zshrc                      -> ~/.config/dotfiles/zsh/.zshrc
 ```
 
 ## Contributing
@@ -152,6 +167,7 @@ Before publishing changes:
 
 ```sh
 bin/dotfiles-doctor
+bin/dotfiles-check
 npm run docs:build
 git status --short
 ```

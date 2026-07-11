@@ -1,104 +1,143 @@
 # Backups And Restore
 
-The installer is designed to avoid deleting existing configuration. When it
-finds a file or folder that would conflict with a managed package, it moves the
-existing item into a timestamped backup folder.
+The project can return your configuration to its pre-install state without
+uninstalling applications. Bootstrap records every target before Stow creates
+links, and the restore command uses that record to avoid deleting unrelated
+files.
 
-::: tip Safety model
-The bootstrap moves old files before linking new ones. It does not merge config
-files automatically because automatic merges can hide mistakes.
+## Quick Restore
+
+Restore all packages from the latest completed installation:
+
+```sh
+~/.config/dotfiles/bin/dotfiles-restore --backup latest
+```
+
+Review the summary and confirm with `y`. For a non-interactive terminal:
+
+```sh
+~/.config/dotfiles/bin/dotfiles-restore --backup latest --yes
+```
+
+::: warning What is not removed
+Restore does not uninstall Homebrew, APT packages, Neovim, WezTerm, fonts, Oh
+My Zsh, or plugins. It only restores configuration targets managed by Stow.
 :::
 
-## Backup Location
+## Restore Selected Packages
 
-Backups are stored in:
-
-```text
-~/.config/dotfiles-backups/<timestamp>/
+```sh
+~/.config/dotfiles/bin/dotfiles-restore --backup latest tmux
+~/.config/dotfiles/bin/dotfiles-restore --backup latest nvim wezterm
 ```
 
-Example:
+Restore a specific installation rather than the latest one:
 
-```text
-~/.config/dotfiles-backups/20260710-154500/.config/nvim
-~/.config/dotfiles-backups/20260710-154500/.config/wezterm
-~/.config/dotfiles-backups/20260710-154500/.tmux.conf
-~/.config/dotfiles-backups/20260710-154500/.local/bin/tmux-dev
-~/.config/dotfiles-backups/20260710-154500/.local/bin/tmux-agent
-~/.config/dotfiles-backups/20260710-154500/.zshrc
+```sh
+~/.config/dotfiles/bin/dotfiles-restore --backup 20260711-154500 --yes
 ```
 
-## Inspect Backups
-
-List backup folders:
+## Find Installation Records
 
 ```sh
 ls -la ~/.config/dotfiles-backups
+cat ~/.config/dotfiles-backups/latest
+cat ~/.config/dotfiles-backups/<timestamp>/status
+column -t -s $'\t' ~/.config/dotfiles-backups/<timestamp>/manifest.tsv
 ```
 
-Inspect a specific backup:
+Manifest states mean:
+
+| State | Before installation | Restore behavior |
+| --- | --- | --- |
+| `absent` | No target existed. | Remove only the link installed by dotfiles. |
+| `moved` | User config was moved into the backup. | Remove the managed link and copy the old config back. |
+| `managed` | Target already pointed to this repo. | Keep it unchanged. |
+
+## Protection Against Data Loss
+
+Before changing anything, restore verifies every selected target. It proceeds
+only when a path is absent or is still a symlink owned by the recorded repo.
+
+If you replaced a symlink with a new file after installation, restore stops:
+
+```text
+refusing to overwrite a modified path: /home/user/.zshrc
+Move it elsewhere, then run the restore command again.
+```
+
+Preserve that file and retry:
 
 ```sh
-find ~/.config/dotfiles-backups/<timestamp> -maxdepth 4 -print
+mv ~/.zshrc ~/.zshrc.after-dotfiles
+~/.config/dotfiles/bin/dotfiles-restore --backup latest zsh
 ```
 
-## Restore A Backup
+The original backup remains in the timestamped folder after restoration.
 
-Remove the symlink and move the backup back.
+## Recover A Broken Shell
 
-Restore Neovim:
+If Zsh reports an error before showing a prompt, start it without loading
+configuration:
 
 ```sh
-rm ~/.config/nvim
-mv ~/.config/dotfiles-backups/<timestamp>/.config/nvim ~/.config/nvim
+/bin/zsh -f
 ```
 
-Restore WezTerm:
+Then restore only Zsh:
 
 ```sh
-rm ~/.config/wezterm
-mv ~/.config/dotfiles-backups/<timestamp>/.config/wezterm ~/.config/wezterm
+~/.config/dotfiles/bin/dotfiles-restore --backup latest --yes zsh
+exec /bin/zsh
 ```
 
-Restore tmux:
+If the dotfiles repo uses a custom path, replace `~/.config/dotfiles` with that
+path.
+
+## Failed Installation
+
+If Stow simulation or linking fails after files were moved, bootstrap runs an
+automatic rollback and writes:
+
+```text
+rolled-back
+```
+
+to the installation record's `status` file. Check it with:
 
 ```sh
-rm ~/.tmux.conf
-mv ~/.config/dotfiles-backups/<timestamp>/.tmux.conf ~/.tmux.conf
+find ~/.config/dotfiles-backups -name status -maxdepth 2 -print -exec cat {} \;
 ```
 
-Restore a tmux layout command:
+Do not manually delete the backup. Run the doctor, resolve the reported
+dependency or conflict, and start the installer again.
+
+## Legacy Backups
+
+Backups made by older versions may not contain `manifest.tsv`. Inspect those
+folders manually:
 
 ```sh
-rm ~/.local/bin/tmux-dev
-mv ~/.config/dotfiles-backups/<timestamp>/.local/bin/tmux-dev ~/.local/bin/tmux-dev
+find ~/.config/dotfiles-backups/<timestamp> -maxdepth 6 -print
 ```
 
-Restore Zsh:
+First unlink the relevant package with Stow:
 
 ```sh
-rm ~/.zshrc
-mv ~/.config/dotfiles-backups/<timestamp>/.zshrc ~/.zshrc
+cd ~/.config/dotfiles
+stow --no-folding --target="$HOME" --delete nvim
 ```
 
-::: warning Use the correct timestamp
-Replace `<timestamp>` with the backup folder you want to restore. If there are
-multiple backups, inspect them before moving files back.
-:::
+Only then move the old configuration back. Do not use `rm -rf` on
+`~/.config/nvim` or `~/.config/wezterm`; they may contain files created after
+installation.
 
-## Reinstall After Restore
-
-After restoring a previous config, you can reinstall the dotfiles package later:
+## Reinstall Later
 
 ```sh
 cd ~/.config/dotfiles
 bin/dotfiles-install nvim
 ```
 
-## Change Backup Location
-
-Use `DOTFILES_BACKUP_DIR`:
-
-```sh
-DOTFILES_BACKUP_DIR="$HOME/dotfiles-backups" ~/.config/dotfiles/bin/bootstrap
-```
+This relinks configuration only. It does not install dependencies or create a
+new backup manifest; use bootstrap when you need the complete safe workflow.

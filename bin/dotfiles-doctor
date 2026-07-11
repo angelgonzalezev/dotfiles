@@ -6,16 +6,37 @@ cd "$repo_root"
 
 echo "repo: $repo_root"
 
+failures=0
+
+check_command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    echo "ok: $1 ($(command -v "$1"))"
+  else
+    echo "missing: $1"
+    failures=$((failures + 1))
+  fi
+}
+
 if ! command -v git >/dev/null 2>&1; then
   echo "missing: git"
   exit 1
 fi
 
-if command -v stow >/dev/null 2>&1; then
-  echo "stow: $(stow --version | head -n 1)"
-else
-  echo "stow: not installed"
-fi
+echo
+echo "required commands:"
+for command_name in git stow nvim tmux rg zsh; do check_command "$command_name"; done
+
+echo
+echo "optional commands:"
+for command_name in wezterm tmux-dev tmux-agent tmux-status; do
+  if command -v "$command_name" >/dev/null 2>&1; then echo "ok: $command_name"; else echo "not installed: $command_name"; fi
+done
+
+echo
+echo "managed paths:"
+for path in "$HOME/.config/nvim/init.lua" "$HOME/.config/wezterm/wezterm.lua" "$HOME/.tmux.conf" "$HOME/.local/bin/tmux-dev" "$HOME/.local/bin/tmux-agent" "$HOME/.local/bin/tmux-status" "$HOME/.zshrc"; do
+  if [ -L "$path" ]; then echo "linked: $path -> $(readlink "$path")"; elif [ -e "$path" ]; then echo "not linked: $path"; else echo "missing: $path"; fi
+done
 
 echo
 echo "git status:"
@@ -28,4 +49,10 @@ if git ls-files | rg -n "(credential|credentials|secret|token|password|passwd|ac
   exit 2
 else
   echo "none detected in tracked file names"
+fi
+
+if [ "$failures" -gt 0 ]; then
+  echo
+  echo "$failures required command(s) missing"
+  exit 1
 fi

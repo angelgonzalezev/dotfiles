@@ -1,7 +1,11 @@
 # Commands
 
-This page collects the commands used by the installer, daily workflow, tmux,
-Zsh, and macOS terminal setup.
+This page collects every project-provided executable and the main external
+commands used by the installer, daily workflow, tmux, Zsh, and terminal setup.
+
+Project scripts under `bin/` are run from the repository. Commands installed by
+the `tmux` package live in `~/.local/bin` and can be run from any directory
+because the Zsh package adds that directory to `PATH`.
 
 ## `bin/bootstrap`
 
@@ -24,7 +28,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
 ```
 
 This mode can ask before installing CLI tools, WezTerm, Oh My Zsh,
-`zsh-autosuggestions`, and dotfiles packages.
+JetBrainsMono Nerd Font, `zsh-autosuggestions`, and dotfiles packages.
 
 Non-interactive run that accepts every install step:
 
@@ -47,6 +51,15 @@ DOTFILES_BACKUP_DIR=~/.config/dotfiles-backups
 DOTFILES_ASSUME_YES=1
 ```
 
+| Exit result | Meaning |
+| --- | --- |
+| `0` | Installation or intentional skip completed successfully. |
+| Non-zero | A requirement, update, backup, simulation, or Stow step failed. |
+
+On a linking failure, bootstrap attempts rollback before returning a non-zero
+status. The final output always includes the installation record and restore
+command after a successful config install.
+
 ## `bin/dotfiles-install`
 
 Links packages into `$HOME` with GNU Stow.
@@ -61,19 +74,50 @@ bin/dotfiles-install zsh
 
 This command never installs apps. It only creates symlinks.
 
+Unlike bootstrap, it does not create a backup manifest. Use bootstrap when
+installing on a machine with existing configuration.
+
+## `bin/dotfiles-restore`
+
+Safely removes managed links and restores files recorded by bootstrap:
+
+```sh
+bin/dotfiles-restore --backup latest
+bin/dotfiles-restore --backup latest --yes
+bin/dotfiles-restore --backup <timestamp> tmux zsh
+```
+
+It refuses to overwrite files that no longer point to this repository.
+
+Options:
+
+| Option | Behavior |
+| --- | --- |
+| `--backup latest` | Use the latest installation that changed a target. This is the default. |
+| `--backup <timestamp>` | Select an exact installation record. |
+| `--yes` / `-y` | Skip the interactive confirmation. |
+| `--help` / `-h` | Print command usage. |
+| Package names | Restore only `nvim`, `wezterm`, `tmux`, or `zsh`. |
+
 ## Maintenance Commands
 
 | Command | Purpose |
 | --- | --- |
-| `bin/dotfiles-doctor` | Checks the repo path, Stow availability, Git status, and suspicious tracked file names. |
+| `bin/dotfiles-doctor` | Checks required/optional commands, managed links, Git status, and suspicious tracked filenames. |
 | `bin/dotfiles-status` | Shows compact Git status for the repo. |
 | `bin/dotfiles-sync` | Shows status and prints the manual commit/push flow. |
+| `bin/dotfiles-check` | Runs syntax, install/restore, config, docs, and whitespace checks. |
 
 ```sh
 bin/dotfiles-doctor
 bin/dotfiles-status
 bin/dotfiles-sync
+bin/dotfiles-check
 ```
+
+`bin/dotfiles-check` is the broadest contributor check. It validates Bash and
+Zsh syntax, isolated install/restore scenarios, documentation links, WezTerm,
+Neovim, tmux when sockets are available, VitePress, and Git whitespace.
 
 ## tmux Layout Commands
 
@@ -87,7 +131,12 @@ tmux-dev
 tmux-dev project-api
 tmux-agent
 tmux-agent content-workflow
+tmux-dev project-api "$HOME/Projects/api"
+tmux-agent agents "$HOME/Projects/automation"
 ```
+
+Both commands accept `[session-name] [starting-directory]`. Existing sessions
+are reused instead of rebuilding their panes.
 
 ## tmux Status Bar Commands
 
@@ -119,6 +168,7 @@ tmux list-keys MouseUp1Control0
 | `tmux kill-session -t dev` | Close a named session. |
 | `tmux kill-server` | Close every tmux session. |
 | `exit` | Close the current shell or pane. |
+| `tmux display-message -p '#S:#I.#P'` | Print current session, window, and pane identifiers. |
 
 ::: warning
 Use `tmux kill-server` only when you want to close every tmux session at once.
@@ -132,6 +182,10 @@ Use `tmux kill-server` only when you want to close every tmux session at once.
 | `open -a WezTerm` | Open WezTerm from a shell. |
 | `open -a WezTerm ~/Desktop` | Open WezTerm in the Desktop folder. |
 | `command -v tmux-dev` | Check that local tmux commands are available. |
+| `zsh -n ~/.zshrc` | Validate Zsh syntax without starting an interactive shell. |
+| `wezterm show-keys` | Print effective WezTerm shortcuts. |
+| `wezterm ls-fonts` | Print fonts visible to WezTerm. |
+| `nvim --headless -i NONE -u ~/.config/nvim/init.lua +qa` | Load Neovim config without opening the UI. |
 
 ## Git Workflow Commands
 

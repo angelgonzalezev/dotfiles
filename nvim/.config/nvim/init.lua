@@ -2,6 +2,10 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+if vim.fn.has("nvim-0.10") ~= 1 then
+  vim.notify("This configuration requires Neovim 0.10 or newer", vim.log.levels.ERROR)
+end
+
 -- Opciones básicas
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -258,6 +262,15 @@ require("lazy").setup({
       },
     },
   },
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
+    if vim.fn.executable("rg") ~= 1 then
+      vim.notify("ripgrep is required by Space f g", vim.log.levels.WARN)
+    end
+  end,
 })
 
 vim.api.nvim_create_autocmd("ColorScheme", {

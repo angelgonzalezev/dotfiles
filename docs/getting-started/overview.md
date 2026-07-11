@@ -20,7 +20,7 @@ This project is useful if you:
 
 | You want to... | This project helps by... |
 | --- | --- |
-| Set up a new Mac faster | Providing a bootstrap installer and documented packages. |
+| Set up a new Mac or Linux machine faster | Providing a bootstrap installer and documented packages. |
 | Keep terminal configuration versioned | Storing shared config in Git instead of only on one machine. |
 | Work faster in the terminal | Providing Neovim, tmux, WezTerm, and Zsh defaults. |
 | Avoid forgetting shortcuts | Documenting the most used commands per app. |
@@ -28,12 +28,43 @@ This project is useful if you:
 
 ## Managed Apps
 
+GNU Stow is the installation layer rather than an end-user configuration
+package. Read its [application guide](/apps/stow) to understand how repository
+files become live configuration.
+
 | App | Package | Target | Main benefit |
 | --- | --- | --- | --- |
-| Neovim | `nvim` | `~/.config/nvim` | Fast keyboard-first editing. |
-| WezTerm | `wezterm` | `~/.config/wezterm` | Consistent terminal UI. |
+| Neovim | `nvim` | Files inside `~/.config/nvim` | Fast keyboard-first editing and project search. |
+| WezTerm | `wezterm` | `~/.config/wezterm/wezterm.lua` | Consistent terminal UI. |
 | tmux | `tmux` | `~/.tmux.conf`, `~/.local/bin/tmux-*` | Persistent terminal workspaces. |
 | Zsh | `zsh` | `~/.zshrc` | Shell prompt, history, and local command path. |
+
+## How The Tools Work Together
+
+| Layer | Tool | Responsibility |
+| --- | --- | --- |
+| Terminal application | WezTerm | Draw the terminal window, tabs, fonts, colors, and native shortcuts. |
+| Interactive shell | Zsh | Read commands, manage history, render the prompt, and expose local scripts. |
+| Persistent workspace | tmux | Keep sessions alive and organize shells into windows and panes. |
+| Editor | Neovim | Edit files and search projects without leaving the terminal. |
+| Link manager | GNU Stow | Connect files in this repository to their expected paths under `$HOME`. |
+
+A typical session looks like this:
+
+```text
+Open WezTerm
+  -> Zsh loads prompt, history, and ~/.local/bin
+  -> run tmux-dev or tmux-agent
+  -> open Neovim in one pane
+  -> run tests, servers, or Git in the other panes
+  -> detach from tmux and return later without losing the workspace
+```
+
+::: info Two different kinds of tabs
+WezTerm tabs belong to the terminal application and disappear when the app
+closes. tmux windows belong to a persistent tmux session and can survive a
+closed terminal. Neovim's top bar shows editor buffers, which are open files.
+:::
 
 ## How It Works
 
@@ -41,8 +72,8 @@ The repo uses GNU Stow. Each package mirrors the final path it should have from
 `$HOME`.
 
 ```text
-nvim/.config/nvim/        -> ~/.config/nvim
-wezterm/.config/wezterm/  -> ~/.config/wezterm
+nvim/.config/nvim/init.lua       -> ~/.config/nvim/init.lua
+wezterm/.config/wezterm/wezterm.lua -> ~/.config/wezterm/wezterm.lua
 tmux/.tmux.conf           -> ~/.tmux.conf
 tmux/.local/bin/          -> ~/.local/bin
 zsh/.zshrc                -> ~/.zshrc
@@ -63,11 +94,33 @@ Depending on what you choose during installation, the project can:
 
 | Area | Possible change |
 | --- | --- |
-| Apps/tools | Install `stow`, `neovim`, `tmux`, WezTerm, Oh My Zsh, and `zsh-autosuggestions`. |
+| Apps/tools | Install Stow, Neovim 0.10+, ripgrep, tmux, Zsh, WezTerm, a Nerd Font, Oh My Zsh, and suggestions. |
 | Config files | Link `nvim`, `wezterm`, `tmux`, and `zsh` configs into your home directory. |
 | Existing files | Move existing configs to `~/.config/dotfiles-backups/<timestamp>/`. |
 | Shell behavior | Add `~/.local/bin` to `PATH` and show the `👼` prompt icon. |
 | tmux workflow | Add `tmux-dev` and `tmux-agent` workspace commands. |
+| Safety | Record every target and provide a package-aware restore command. |
+
+## Package Configuration Summary
+
+| Package | Main configuration applied |
+| --- | --- |
+| `nvim` | Catppuccin theme, relative numbers, smart-case search, Snacks pickers, Lualine, and a custom buffer line. |
+| `wezterm` | Nerd Font, Catppuccin colors, opacity, padding, native macOS controls, custom tabs, and tab navigation. |
+| `tmux` | `Ctrl+a` prefix, pane/window shortcuts, Vi copy mode, persistent layouts, and a system status bar. |
+| `zsh` | Oh My Zsh theme, angel prompt, shared history, Git plugin, suggestions, Homebrew activation, and local overrides. |
+
+## Platform Support
+
+| Platform | Automated dependencies | Config support |
+| --- | --- | --- |
+| macOS | Homebrew | Full |
+| Ubuntu/Debian | APT and official releases | Full |
+| Other Linux | Manual | Stow packages can be linked after dependencies are installed |
+
+macOS-specific blur and title buttons are enabled only on macOS. Linux uses
+portable WezTerm decorations and reads tmux system information from `/proc` and
+`/sys` when available.
 
 ## What Stays Out
 

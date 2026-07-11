@@ -34,12 +34,14 @@ export default defineConfig({
         items: [
           { text: 'Managing Configurations', link: '/guides/managing-configurations' },
           { text: 'Backups and Restore', link: '/guides/backups-and-restore' },
+          { text: 'Troubleshooting', link: '/guides/troubleshooting' },
           { text: 'macOS Terminal Shortcut', link: '/guides/macos-terminal-shortcut' }
         ]
       },
       {
         text: 'Apps',
         items: [
+          { text: 'GNU Stow', link: '/apps/stow' },
           { text: 'Neovim', link: '/apps/nvim' },
           { text: 'WezTerm', link: '/apps/wezterm' },
           { text: 'tmux', link: '/apps/tmux' },

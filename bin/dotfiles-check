@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+scripts=(bin/bootstrap bin/dotfiles-install bin/dotfiles-restore bin/dotfiles-doctor bin/dotfiles-status bin/dotfiles-sync bin/dotfiles-check tmux/.local/bin/tmux-dev tmux/.local/bin/tmux-agent tmux/.local/bin/tmux-status tests/install-restore.sh)
+
+echo "checking shell syntax"
+bash -n "${scripts[@]}"
+zsh -n zsh/.zshrc
+
+if command -v shellcheck >/dev/null 2>&1; then
+  echo "running ShellCheck"
+  shellcheck "${scripts[@]}"
+else
+  echo "ShellCheck not installed; skipping static shell analysis"
+fi
+
+echo "testing install and restore"
+tests/install-restore.sh
+
+echo "checking documentation links and assets"
+node tests/docs-links.mjs
+
+if command -v wezterm >/dev/null 2>&1; then
+  echo "validating WezTerm configuration"
+  wezterm --config-file wezterm/.config/wezterm/wezterm.lua show-keys >/dev/null
+fi
+
+if command -v nvim >/dev/null 2>&1; then
+  echo "validating Neovim configuration"
+  nvim --headless -i NONE -u nvim/.config/nvim/init.lua +qa
+fi
+
+if command -v tmux >/dev/null 2>&1 && [ "${DOTFILES_SKIP_TMUX_RUNTIME:-0}" != 1 ]; then
+  echo "validating tmux configuration"
+  tmux_socket="${TMPDIR:-/tmp}/dotfiles-check-$$.sock"
+  tmux -S "$tmux_socket" -f tmux/.tmux.conf new-session -d -s dotfiles-check
+  if ! tmux -S "$tmux_socket" list-keys -T root M-1 | grep -q 'select-pane -t 1'; then
+    tmux -S "$tmux_socket" kill-server
+    echo "tmux M-1 binding is missing"
+    exit 1
+  fi
+  tmux -S "$tmux_socket" kill-server
+fi
+
+if [ "${DOTFILES_SKIP_DOCS:-0}" != 1 ]; then
+  echo "building documentation"
+  npm run docs:build
+fi
+
+git diff --check
+echo "all checks passed"

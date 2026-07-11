@@ -4,6 +4,36 @@ After installation, your live config files are symlinks into this repository.
 That means you can edit your normal config paths and still keep everything
 versioned in Git.
 
+## Start A Development Session
+
+Open WezTerm, move to a project, and choose a layout:
+
+```sh
+cd "$HOME/Projects/example"
+tmux-dev example
+```
+
+Use the first pane for Neovim and the second for tests or a development server:
+
+```sh
+nvim .
+```
+
+For four simultaneous commands:
+
+```sh
+tmux-agent example-agents "$HOME/Projects/example"
+```
+
+Detach with `Ctrl+a`, then `d`. Return later with:
+
+```sh
+tmux attach -t example
+```
+
+The [application pages](/apps/wezterm) explain how terminal tabs, tmux windows,
+tmux panes, and Neovim buffers differ.
+
 ## Update Local Configs
 
 Pull the latest changes:
@@ -25,6 +55,7 @@ These paths are managed by the repo:
 ~/.tmux.conf
 ~/.local/bin/tmux-dev
 ~/.local/bin/tmux-agent
+~/.local/bin/tmux-status
 ~/.zshrc
 ```
 
@@ -65,6 +96,7 @@ Run:
 
 ```sh
 bin/dotfiles-doctor
+bin/dotfiles-check
 git status --short
 ```
 

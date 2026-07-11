@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: "dotfiles"
-  text: "Terminal setup, workflow, and docs for faster development."
+  text: "A Developer Setup Designed to Help You Build Faster."
   actions:
     - theme: brand
       text: Install now
@@ -29,7 +29,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
     <h2 id="tech-stack-title">Terminal-based development</h2>
   </div>
   <div class="tech-stack__grid">
-    <article class="tech-card">
+    <a class="tech-card" href="/apps/nvim">
       <div class="tech-card__logo tech-card__logo--nvim">
         <img src="/images/logos/neovim-logo.png" alt="Neovim logo" />
       </div>
@@ -37,8 +37,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
         <h3>Neovim</h3>
         <p>Terminal editor configured for fast navigation, file search, grep, buffers, and daily coding shortcuts.</p>
       </div>
-    </article>
-    <article class="tech-card">
+    </a>
+    <a class="tech-card" href="/apps/wezterm">
       <div class="tech-card__logo tech-card__logo--wezterm">
         <img src="/images/logos/wezterm-logo.svg" alt="WezTerm logo" />
       </div>
@@ -46,8 +46,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
         <h3>WezTerm</h3>
         <p>GPU-powered terminal with custom tabs, panes, keyboard shortcuts, font settings, and visual styling.</p>
       </div>
-    </article>
-    <article class="tech-card">
+    </a>
+    <a class="tech-card" href="/apps/tmux">
       <div class="tech-card__logo tech-card__logo--tmux">
         <img src="/images/logos/tmux-logo.svg" alt="tmux logo" />
       </div>
@@ -55,8 +55,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
         <h3>tmux</h3>
         <p>Persistent terminal sessions, reusable layouts, split panes, and a custom status bar for development context.</p>
       </div>
-    </article>
-    <article class="tech-card">
+    </a>
+    <a class="tech-card" href="/apps/zsh">
       <div class="tech-card__logo tech-card__logo--zsh">
         <img src="/images/logos/zsh-logo.svg" alt="Zsh logo" />
       </div>
@@ -64,8 +64,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
         <h3>Zsh</h3>
         <p>Shell configuration with Oh My Zsh, prompt customization, command history, aliases, and local overrides.</p>
       </div>
-    </article>
-    <article class="tech-card">
+    </a>
+    <a class="tech-card" href="/apps/stow">
       <div class="tech-card__logo tech-card__logo--stow">
         <img src="/images/logos/gnu-stow-logo.webp" alt="GNU Stow logo" />
       </div>
@@ -73,7 +73,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles
         <h3>GNU Stow</h3>
         <p>Symlink manager that installs the selected configuration packages into the correct locations in `$HOME`.</p>
       </div>
-    </article>
+    </a>
   </div>
 </section>
 

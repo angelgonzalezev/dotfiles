@@ -16,11 +16,13 @@ local colors = {
 
 local terminal_background = "rgba(30, 30, 46, 0.84)"
 
-config.font = wezterm.font("JetBrains Mono")
+config.font = wezterm.font_with_fallback({
+  "JetBrainsMono Nerd Font",
+  "JetBrains Mono",
+})
 config.font_size = 14
 config.color_scheme = "Catppuccin Mocha"
 config.window_background_opacity = 0.84
-config.macos_window_background_blur = 35
 config.line_height = 1.05
 
 config.window_padding = {
@@ -30,12 +32,20 @@ config.window_padding = {
   bottom = 12,
 }
 
-config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
-config.integrated_title_button_style = "MacOsNative"
-config.integrated_title_button_alignment = "Left"
-config.integrated_title_buttons = { "Close", "Hide", "Maximize" }
+config.window_decorations = "RESIZE"
+
+if wezterm.target_triple:find("darwin") then
+  config.macos_window_background_blur = 35
+  config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+  config.integrated_title_button_style = "MacOsNative"
+  config.integrated_title_button_alignment = "Left"
+  config.integrated_title_buttons = { "Close", "Hide", "Maximize" }
+end
 config.window_frame = {
-  font = wezterm.font("JetBrains Mono", { weight = "DemiBold" }),
+  font = wezterm.font_with_fallback({
+    { family = "JetBrainsMono Nerd Font", weight = "DemiBold" },
+    { family = "JetBrains Mono", weight = "DemiBold" },
+  }),
   font_size = 15.5,
   active_titlebar_bg = terminal_background,
   inactive_titlebar_bg = terminal_background,

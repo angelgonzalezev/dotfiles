@@ -24,8 +24,11 @@ Run:
 
 ```sh
 bin/dotfiles-doctor
+bin/dotfiles-check
 git status --short
 ```
+
+The equivalent npm entry point is `npm run check`.
 
 Review every file before staging it:
 
@@ -81,6 +84,7 @@ git ls-files
 npm run docs:build
 bash -n bin/bootstrap
 bash -n bin/dotfiles-install
+bash -n bin/dotfiles-restore
 zsh -n zsh/.zshrc
 ```
 
@@ -94,6 +98,23 @@ When adding or changing behavior, update the relevant docs:
 | New command | `docs/reference/commands.md`. |
 | New install behavior | `docs/getting-started/install.md`. |
 | New safety behavior | `docs/guides/backups-and-restore.md`. |
+
+## Continuous Integration
+
+GitHub Actions runs the local check suite on macOS and Ubuntu. Pull requests
+It also runs the isolated installer tests inside Debian 12. Pull requests must
+preserve:
+
+```text
+shell syntax and ShellCheck
+isolated install and restore behavior
+Neovim configuration loading
+VitePress production build
+clean Git whitespace
+```
+
+When changing bootstrap or restore behavior, add a temporary-home regression
+case to `tests/install-restore.sh`.
 
 ## License
 

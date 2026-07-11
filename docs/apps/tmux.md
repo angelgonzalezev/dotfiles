@@ -91,6 +91,23 @@ key. For example, `Ctrl+a` then `c` creates a new window.
 | `Opt + Arrow` | Move between panes |
 | `Opt + H/J/K/L` | Resize panes |
 
+All shortcuts in this table are explicitly configured in `.tmux.conf`, except
+`Ctrl+a` then `d` and `Ctrl+a` then `q`, which remain standard tmux bindings
+under the new prefix.
+
+### Prefix And Direct Shortcuts
+
+There are two types of shortcuts:
+
+| Type | How it works | Example |
+| --- | --- | --- |
+| Prefix command | Press and release `Ctrl+a`, then press another key. | `Ctrl+a`, then `c` creates a window. |
+| Direct binding | Hold Option/Alt and press the key without using the prefix. | `Opt+2` selects pane 2. |
+
+The direct `Opt` bindings depend on the terminal sending Alt/Meta combinations.
+They are verified with this project's WezTerm setup. If another terminal
+captures Option for special characters, use the prefix plus `h/j/k/l` instead.
+
 For most users, the easiest pane navigation is:
 
 ```text
@@ -106,6 +123,56 @@ On macOS, `Opt` is the `Alt` key.
 
 If you forget which pane is which, press `Ctrl+a` then `q` and tmux will show
 the pane numbers for a moment.
+
+## Complete Session Configuration
+
+| Setting | Value | Effect |
+| --- | --- | --- |
+| Prefix | `Ctrl+a` | Replaces the default `Ctrl+b`. |
+| Mouse | Enabled | Select panes, resize borders, scroll, and click status elements. |
+| Scrollback | `100000` lines | Keeps substantially more terminal history per pane. |
+| First window | `1` | Window numbering starts at 1 instead of 0. |
+| First pane | `1` | Pane numbering matches the `Opt+1` to `Opt+4` shortcuts. |
+| Renumber windows | Enabled | Removes gaps after a window is closed. |
+| Automatic names | Enabled | Window names follow the active command unless manually renamed. |
+| Terminal titles | Enabled | Exposes tmux session/window information to WezTerm. |
+| Repeat time | `300 ms` | Allows repeatable key bindings to be pressed again briefly without another prefix. |
+| Copy mode | Vi | Uses familiar Vim movement and selection keys. |
+| Escape delay | `10 ms` | Reduces delay when leaving Neovim insert mode inside tmux. |
+
+New panes and windows inherit the current pane's working directory. This is why
+splitting while working in a project opens the new shell in the same project.
+
+## Pane And Window Lifecycle
+
+| Goal | Command |
+| --- | --- |
+| Create a new window in the current directory | `Ctrl+a`, then `c` |
+| Split into left/right panes | `Ctrl+a`, then `\|` |
+| Split into top/bottom panes | `Ctrl+a`, then `-` |
+| Close only the active pane | `Ctrl+a`, then `x`, or run `exit` |
+| Close the complete active window | `Ctrl+a`, then `&` |
+| Move to next/previous window | `Ctrl+a`, then `n` / `p` |
+| Detach and keep everything running | `Ctrl+a`, then `d` |
+
+The words “horizontal” and “vertical” can be ambiguous. In this project,
+`split-window -h` creates panes side by side and is bound to `|`; `split-window
+-v` creates panes above and below and is bound to `-`.
+
+## Copy Mode
+
+Enter copy mode with the standard `Ctrl+a`, then `[` binding. The project adds
+these Vi-style controls:
+
+| Key | Action |
+| --- | --- |
+| `v` | Begin selecting text. |
+| Vi movement keys | Extend the selection. |
+| `y` | Copy the selection and leave copy mode. |
+| `Esc` | Cancel copy mode. |
+
+With mouse mode enabled, scrolling a pane also enters tmux history when the
+application inside the pane is not handling the mouse itself.
 
 ## Status Bar
 
@@ -134,10 +201,10 @@ It shows:
 | --- | --- | --- | --- | --- |
 | `👼` | Prompt icon | Personal workspace marker. | Static symbol in `tmux-status`. | None |
 | Text | Shell | Current login shell, such as `zsh` or `fish`. | `basename "$SHELL"` | `sh` |
-| `⚙` | CPU load | CPU usage averaged across cores. | `iostat`, then `sar`, then `ps aux` divided by CPU count | `0.0%` |
+| `⚙` | CPU load | CPU usage averaged across cores. | macOS: `iostat`; Linux: `/proc/stat`; fallback: normalized process CPU | `0.0%` |
 | `▣` | tmux sessions | Number of active tmux sessions. | `tmux list-sessions` plus `wc -l` | `0` |
-| `󰔟` | Uptime | Time since the Mac last booted. | `sysctl kern.boottime` plus `date +%s` | `n/a` |
-| `󰁹` | Battery | Current battery percentage. | `pmset -g batt` parsed with `awk` | `n/a` |
+| `󰔟` | Uptime | Time since the machine last booted. | macOS: `sysctl`; Linux: `/proc/uptime` | `n/a` |
+| `󰁹` | Battery | Current battery percentage. | macOS: `pmset`; Linux: `/sys/class/power_supply` | `n/a` |
 
 The CPU, tmux sessions, uptime, and battery segments are clickable. Clicking a
 segment shows a short explanation in tmux's message area.
@@ -163,13 +230,15 @@ Catppuccin/tmux delegates the CPU value to the `tmux-cpu` plugin, which exposes
 This project does not install the full plugin for this small segment, but the
 local `tmux-status` script mirrors the same calculation strategy:
 
-1. Use `iostat` when available.
+1. On Linux, sample aggregate counters from `/proc/stat` and calculate the
+   difference between total and idle CPU time.
+2. On macOS, use `iostat` when available.
    This is the preferred source because it reads system CPU idle data and
    calculates usage as `100 - idle`.
-2. Use `sar` when available.
+3. Use `sar` when available.
    This is another system-level source that can calculate usage from the idle
    column.
-3. Fall back to `ps aux`.
+4. Fall back to `ps aux`.
    If neither `iostat` nor `sar` is available, the script sums process CPU usage
    and divides it by the number of CPU cores.
 
@@ -268,12 +337,32 @@ Mono, so a patched JetBrainsMono Nerd Font is a good fit.
 | `tmux-agent` | Opens or attaches to an `agent` session with 4 panes in a tiled layout. |
 
 Both commands start in the current directory. You can pass a custom session name
-as the first argument:
+as the first argument and a starting directory as the second:
 
 ```sh
 tmux-dev project-api
 tmux-agent content-workflow
+tmux-dev project-api "$HOME/Projects/api"
+tmux-agent agents "$HOME/Projects/automation"
 ```
+
+Command behavior:
+
+1. If the named session already exists, attach to it from a normal shell or
+   switch to it when already inside tmux.
+2. Otherwise create the session in the selected starting directory.
+3. Build the requested layout and focus the first pane.
+4. Attach or switch the current client to the new session.
+
+| Command | Default session | Pane construction | Final layout |
+| --- | --- | --- | --- |
+| `tmux-dev [name] [directory]` | `dev` | One right-hand split | Two equal columns |
+| `tmux-agent [name] [directory]` | `agent` | Left/right split, then split both columns | Four tiled panes |
+
+::: tip Reusing layouts
+Running `tmux-agent` twice does not create eight panes. The second invocation
+finds the existing `agent` session and reconnects to it.
+:::
 
 ## Session Commands
 
@@ -310,3 +399,16 @@ The config lives in `tmux/.tmux.conf`. Layout commands live in
 `tmux kill-server` closes every tmux session. Use `tmux kill-session` when you
 only want to close the current session.
 :::
+
+## Diagnose The Effective Configuration
+
+| Command | What it confirms |
+| --- | --- |
+| `tmux show-options -g prefix` | The active prefix is `C-a`. |
+| `tmux list-keys -T root M-1` | Direct pane 1 navigation is loaded. |
+| `tmux list-keys -T prefix r` | The reload command is loaded. |
+| `tmux show-options -g status-right` | The dynamic status script is configured. |
+| `tmux display-message -p '#S:#I.#P'` | Current session, window, and pane numbers. |
+
+Run `Ctrl+a`, then `r` after editing `.tmux.conf`. Existing sessions keep
+running while tmux replaces the active options and bindings.
