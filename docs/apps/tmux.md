@@ -85,8 +85,27 @@ key. For example, `Ctrl+a` then `c` creates a new window.
 | `Ctrl+a` then `r` | Reload configuration |
 | `Ctrl+a` then `n` | Next window |
 | `Ctrl+a` then `p` | Previous window |
-| `Alt + Arrow` | Move between panes |
-| `Alt + H/J/K/L` | Resize panes |
+| `Ctrl+a` then `h/j/k/l` | Move between panes left, down, up, or right |
+| `Ctrl+a` then `q` | Show pane numbers briefly |
+| `Opt + 1/2/3/4` | Jump to pane 1, 2, 3, or 4 in the current window |
+| `Opt + Arrow` | Move between panes |
+| `Opt + H/J/K/L` | Resize panes |
+
+For most users, the easiest pane navigation is:
+
+```text
+Opt + 1 / 2 / 3 / 4
+```
+
+Use `Opt + 1` to `Opt + 4` when you want to jump directly to a pane. Use
+`h/j/k/l` when you want to move relative to the current pane. The `Opt +
+Arrow` bindings are there as a faster alternative when the terminal sends the
+keys correctly.
+
+On macOS, `Opt` is the `Alt` key.
+
+If you forget which pane is which, press `Ctrl+a` then `q` and tmux will show
+the pane numbers for a moment.
 
 ## Status Bar
 
@@ -268,6 +287,7 @@ tmux-agent content-workflow
 | `tmux kill-session` | Close the current tmux session and all its windows and panes. |
 | `tmux kill-session -t <name>` | Close a specific tmux session. |
 | `tmux kill-server` | Close every tmux session. |
+| `Ctrl+a` then `h/j/k/l` | Move between panes left, down, up, or right. |
 
 ## Exiting And Closing
 

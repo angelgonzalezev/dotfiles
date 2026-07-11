@@ -4,7 +4,6 @@ layout: home
 hero:
   name: "dotfiles"
   text: "Terminal setup, workflow, and docs for faster development."
-  tagline: "A personal open source workspace for reproducing a clean development environment and keeping terminal tools easy to maintain."
   actions:
     - theme: brand
       text: Install now
@@ -13,6 +12,16 @@ hero:
       text: View GitHub
       link: https://github.com/angelgonzalezev/dotfiles
 ---
+
+<section class="install-cta" aria-labelledby="install-cta-title">
+  <div class="install-cta__content">
+    <p class="install-cta__eyebrow">Install in one command</p>
+  </div>
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+```
+</section>
 
 <section class="tech-stack" aria-labelledby="tech-stack-title">
   <div class="tech-stack__header">
