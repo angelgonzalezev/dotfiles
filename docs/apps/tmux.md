@@ -115,16 +115,58 @@ It shows:
 | --- | --- | --- | --- | --- |
 | `👼` | Prompt icon | Personal workspace marker. | Static symbol in `tmux-status`. | None |
 | Text | Shell | Current login shell, such as `zsh` or `fish`. | `basename "$SHELL"` | `sh` |
-| `⚙` | CPU load | Total CPU percentage across running processes. | `ps -A -o %cpu=` summarized with `awk` | `0.0%` |
+| `⚙` | CPU load | CPU usage averaged across cores. | `iostat`, then `sar`, then `ps aux` divided by CPU count | `0.0%` |
 | `▣` | tmux sessions | Number of active tmux sessions. | `tmux list-sessions` plus `wc -l` | `0` |
 | `󰔟` | Uptime | Time since the Mac last booted. | `sysctl kern.boottime` plus `date +%s` | `n/a` |
 | `󰁹` | Battery | Current battery percentage. | `pmset -g batt` parsed with `awk` | `n/a` |
+
+The CPU, tmux sessions, uptime, and battery segments are clickable. Clicking a
+segment shows a short explanation in tmux's message area.
+
+| Click target | Message |
+| --- | --- |
+| `⚙` / CPU value | `CPU usage` |
+| `▣` / session count | `tmux sessions` |
+| `󰔟` / uptime value | `system uptime` |
+| `󰁹` / battery value | `battery level` |
 
 Example output before tmux renders colors:
 
 ```text
 👼 zsh ⚙ 12.0% ▣ 2 󰔟 7d 22h 19m 󰁹 100%
 ```
+
+::: info CPU calculation
+The CPU segment follows the same idea used by Catppuccin's tmux CPU module.
+Catppuccin/tmux delegates the CPU value to the `tmux-cpu` plugin, which exposes
+`#{cpu_percentage}` as CPU usage averaged across cores.
+
+This project does not install the full plugin for this small segment, but the
+local `tmux-status` script mirrors the same calculation strategy:
+
+1. Use `iostat` when available.
+   This is the preferred source because it reads system CPU idle data and
+   calculates usage as `100 - idle`.
+2. Use `sar` when available.
+   This is another system-level source that can calculate usage from the idle
+   column.
+3. Fall back to `ps aux`.
+   If neither `iostat` nor `sar` is available, the script sums process CPU usage
+   and divides it by the number of CPU cores.
+
+The fallback normalization is important on multi-core machines. Without it,
+process CPU totals can show values higher than `100%`, such as `160%`, because
+macOS can report CPU usage accumulated across multiple cores.
+:::
+
+References:
+
+| Resource | What to check |
+| --- | --- |
+| [catppuccin/tmux](https://github.com/catppuccin/tmux) | Theme and status module structure. |
+| [catppuccin/tmux CPU module](https://github.com/catppuccin/tmux/blob/main/status/cpu.conf) | The Catppuccin CPU segment that uses `#{cpu_percentage}`. |
+| [tmux-plugins/tmux-cpu](https://github.com/tmux-plugins/tmux-cpu) | Plugin that provides `#{cpu_percentage}`. |
+| [tmux-cpu CPU script](https://github.com/tmux-plugins/tmux-cpu/blob/master/scripts/cpu_percentage.sh) | Original `iostat`, `sar`, and `ps aux` calculation flow. |
 
 ## Status Bar Commands
 
@@ -170,6 +212,21 @@ The bar refreshes every five seconds:
 
 ```text
 set -g status-interval 5
+```
+
+Click messages stay visible for five seconds:
+
+```text
+set -g display-time 5000
+```
+
+The click handlers are defined with tmux `control` ranges:
+
+```text
+MouseUp1Control0 -> CPU usage help
+MouseUp1Control1 -> tmux sessions help
+MouseUp1Control2 -> uptime help
+MouseUp1Control3 -> battery help
 ```
 
 ::: info Why not load the full plugin?

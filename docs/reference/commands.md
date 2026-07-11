@@ -97,11 +97,13 @@ tmux-agent content-workflow
 | `tmux source-file ~/.tmux.conf` | Reloads tmux configuration. |
 | `tmux show-options -g status-right` | Shows the current right-side status configuration. |
 | `bin/dotfiles-install tmux` | Reinstalls tmux symlinks, including `tmux-status`. |
+| `tmux list-keys MouseUp1Control0` | Shows the CPU segment click binding. |
 
 ```sh
 ~/.local/bin/tmux-status
 tmux source-file ~/.tmux.conf
 tmux show-options -g status-right
+tmux list-keys MouseUp1Control0
 ```
 
 ## Common tmux Commands

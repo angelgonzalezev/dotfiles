@@ -3,7 +3,59 @@ set -u
 
 shell_name="$(basename "${SHELL:-sh}")"
 
-cpu_load="$(ps -A -o %cpu= 2>/dev/null | awk '{sum += $1} END {printf "%.1f%%", sum + 0}')"
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+cpu_count() {
+  if command_exists getconf; then
+    getconf _NPROCESSORS_ONLN 2>/dev/null && return
+  fi
+
+  if command_exists sysctl; then
+    sysctl -n hw.ncpu 2>/dev/null && return
+  fi
+
+  printf '1\n'
+}
+
+cpu_percentage() {
+  if command_exists iostat; then
+    value="$(
+      iostat -c 2 disk0 2>/dev/null |
+        sed '/^[[:space:]]*$/d' |
+        tail -n 1 |
+        awk '{usage = 100 - $6} END {printf "%.1f%%", usage}' |
+        sed 's/,/./'
+    )"
+
+    if [ -n "$value" ]; then
+      printf '%s\n' "$value"
+      return
+    fi
+  fi
+
+  if command_exists sar; then
+    value="$(
+      sar -u 1 1 2>/dev/null |
+        sed '/^[[:space:]]*$/d' |
+        tail -n 1 |
+        awk '{usage = 100 - $NF} END {printf "%.1f%%", usage}' |
+        sed 's/,/./'
+    )"
+
+    if [ -n "$value" ]; then
+      printf '%s\n' "$value"
+      return
+    fi
+  fi
+
+  load="$(ps aux 2>/dev/null | awk 'NR > 1 {sum += $3} END {print sum + 0}')"
+  cpus="$(cpu_count)"
+  awk -v load="$load" -v cpus="$cpus" 'BEGIN {printf "%.1f%%", load / cpus}'
+}
+
+cpu_load="$(cpu_percentage)"
 
 session_count="$(tmux list-sessions 2>/dev/null | wc -l | tr -d ' ')"
 if [ -z "$session_count" ]; then
@@ -33,11 +85,11 @@ fi
 
 printf '#[bg=#f4dbd6,fg=#181926,bold] 👼 '
 printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$shell_name"
-printf '#[bg=#eed49f,fg=#181926,bold] ⚙ '
-printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$cpu_load"
-printf '#[bg=#a6da95,fg=#181926,bold] ▣ '
-printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$session_count"
-printf '#[bg=#91d7e3,fg=#181926,bold] 󰔟 '
-printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$uptime_text"
-printf '#[bg=#b7bdf8,fg=#181926,bold] 󰁹 '
-printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$battery_text"
+printf '#[range=control|0]#[bg=#eed49f,fg=#181926,bold] ⚙ '
+printf '#[bg=#363a4f,fg=#cad3f5] %s #[norange]' "$cpu_load"
+printf '#[range=control|1]#[bg=#a6da95,fg=#181926,bold] ▣ '
+printf '#[bg=#363a4f,fg=#cad3f5] %s #[norange]' "$session_count"
+printf '#[range=control|2]#[bg=#91d7e3,fg=#181926,bold] 󰔟 '
+printf '#[bg=#363a4f,fg=#cad3f5] %s #[norange]' "$uptime_text"
+printf '#[range=control|3]#[bg=#b7bdf8,fg=#181926,bold] 󰁹 '
+printf '#[bg=#363a4f,fg=#cad3f5] %s #[norange]' "$battery_text"
