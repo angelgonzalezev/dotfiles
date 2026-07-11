@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -u
+
+shell_name="$(basename "${SHELL:-sh}")"
+
+cpu_load="$(ps -A -o %cpu= 2>/dev/null | awk '{sum += $1} END {printf "%.1f%%", sum + 0}')"
+
+session_count="$(tmux list-sessions 2>/dev/null | wc -l | tr -d ' ')"
+if [ -z "$session_count" ]; then
+  session_count="0"
+fi
+
+boot_time="$(sysctl -n kern.boottime 2>/dev/null | awk -F'[=,]' '{gsub(/[^0-9]/, "", $2); print $2}')"
+if [ -n "$boot_time" ]; then
+  now="$(date +%s)"
+  uptime_seconds="$((now - boot_time))"
+  uptime_days="$((uptime_seconds / 86400))"
+  uptime_hours="$(((uptime_seconds % 86400) / 3600))"
+  uptime_minutes="$(((uptime_seconds % 3600) / 60))"
+  uptime_text="${uptime_days}d ${uptime_hours}h ${uptime_minutes}m"
+else
+  uptime_text="n/a"
+fi
+
+battery_text="$(
+  pmset -g batt 2>/dev/null |
+    awk '/InternalBattery/ {match($0, /[0-9]+%/); if (RSTART > 0) print substr($0, RSTART, RLENGTH); exit}'
+)"
+
+if [ -z "$battery_text" ]; then
+  battery_text="n/a"
+fi
+
+printf '#[bg=#f4dbd6,fg=#181926,bold] 👼 '
+printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$shell_name"
+printf '#[bg=#eed49f,fg=#181926,bold] ⚙ '
+printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$cpu_load"
+printf '#[bg=#a6da95,fg=#181926,bold] ▣ '
+printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$session_count"
+printf '#[bg=#91d7e3,fg=#181926,bold] 󰔟 '
+printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$uptime_text"
+printf '#[bg=#b7bdf8,fg=#181926,bold] 󰁹 '
+printf '#[bg=#363a4f,fg=#cad3f5] %s ' "$battery_text"

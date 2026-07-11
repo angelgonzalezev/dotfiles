@@ -89,6 +89,21 @@ tmux-agent
 tmux-agent content-workflow
 ```
 
+## tmux Status Bar Commands
+
+| Command | Purpose |
+| --- | --- |
+| `~/.local/bin/tmux-status` | Prints the dynamic right-side tmux status segments. |
+| `tmux source-file ~/.tmux.conf` | Reloads tmux configuration. |
+| `tmux show-options -g status-right` | Shows the current right-side status configuration. |
+| `bin/dotfiles-install tmux` | Reinstalls tmux symlinks, including `tmux-status`. |
+
+```sh
+~/.local/bin/tmux-status
+tmux source-file ~/.tmux.conf
+tmux show-options -g status-right
+```
+
 ## Common tmux Commands
 
 | Command | Purpose |
