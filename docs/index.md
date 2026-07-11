@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: "Angel's dotfiles"
+  name: "dotfiles"
   text: "Terminal setup, workflow, and docs for faster development."
-  tagline: "A personal open source workspace created by Angel Gonzalez to reproduce a clean development environment, remember the important commands, and keep terminal tools easy to maintain."
+  tagline: "A personal open source workspace for reproducing a clean development environment and keeping terminal tools easy to maintain."
   actions:
     - theme: brand
       text: Install now
@@ -14,26 +14,57 @@ hero:
       link: https://github.com/angelgonzalezev/dotfiles
 ---
 
-<section class="brand-process">
-  <div class="brand-process__item">
-    <span class="brand-process__icon">💡</span>
-    <h2>Understand</h2>
-    <p>Know what each tool does and why it exists in the workflow.</p>
+<section class="tech-stack" aria-labelledby="tech-stack-title">
+  <div class="tech-stack__header">
+    <p class="tech-stack__eyebrow">What this workspace uses</p>
+    <h2 id="tech-stack-title">Terminal-based development</h2>
   </div>
-  <div class="brand-process__item">
-    <span class="brand-process__icon">🔍</span>
-    <h2>Install</h2>
-    <p>Run the installer and choose the configurations you want to apply.</p>
-  </div>
-  <div class="brand-process__item">
-    <span class="brand-process__icon">🛠️</span>
-    <h2>Build</h2>
-    <p>Use Neovim, WezTerm, tmux, and Zsh with a repeatable setup.</p>
-  </div>
-  <div class="brand-process__item">
-    <span class="brand-process__icon">🚀</span>
-    <h2>Improve</h2>
-    <p>Version your changes, publish updates, and propose improvements with PRs.</p>
+  <div class="tech-stack__grid">
+    <article class="tech-card">
+      <div class="tech-card__logo tech-card__logo--nvim">
+        <img src="/images/logos/neovim-logo.png" alt="Neovim logo" />
+      </div>
+      <div>
+        <h3>Neovim</h3>
+        <p>Terminal editor configured for fast navigation, file search, grep, buffers, and daily coding shortcuts.</p>
+      </div>
+    </article>
+    <article class="tech-card">
+      <div class="tech-card__logo tech-card__logo--wezterm">
+        <img src="/images/logos/wezterm-logo.svg" alt="WezTerm logo" />
+      </div>
+      <div>
+        <h3>WezTerm</h3>
+        <p>GPU-powered terminal with custom tabs, panes, keyboard shortcuts, font settings, and visual styling.</p>
+      </div>
+    </article>
+    <article class="tech-card">
+      <div class="tech-card__logo tech-card__logo--tmux">
+        <img src="/images/logos/tmux-logo.svg" alt="tmux logo" />
+      </div>
+      <div>
+        <h3>tmux</h3>
+        <p>Persistent terminal sessions, reusable layouts, split panes, and a custom status bar for development context.</p>
+      </div>
+    </article>
+    <article class="tech-card">
+      <div class="tech-card__logo tech-card__logo--zsh">
+        <img src="/images/logos/zsh-logo.svg" alt="Zsh logo" />
+      </div>
+      <div>
+        <h3>Zsh</h3>
+        <p>Shell configuration with Oh My Zsh, prompt customization, command history, aliases, and local overrides.</p>
+      </div>
+    </article>
+    <article class="tech-card">
+      <div class="tech-card__logo tech-card__logo--stow">
+        <img src="/images/logos/gnu-stow-logo.webp" alt="GNU Stow logo" />
+      </div>
+      <div>
+        <h3>GNU Stow</h3>
+        <p>Symlink manager that installs the selected configuration packages into the correct locations in `$HOME`.</p>
+      </div>
+    </article>
   </div>
 </section>
 
