@@ -4,11 +4,13 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 tmp_root="$(mktemp -d)"
 trap 'rm -rf "$tmp_root"' EXIT
+export GIT_CONFIG_GLOBAL="$tmp_root/gitconfig"
 
 fixture_repo="$tmp_root/source"
 mkdir -p "$fixture_repo"
 COPYFILE_DISABLE=1 tar -C "$repo_root" --exclude=.git --exclude=node_modules --exclude=.tmp-tmux --exclude=docs/.vitepress/dist --exclude=docs/.vitepress/cache -cf - . | COPYFILE_DISABLE=1 tar -C "$fixture_repo" -xf -
 git -C "$fixture_repo" init -q
+git config --global --add safe.directory "$fixture_repo"
 git -C "$fixture_repo" add .
 git -C "$fixture_repo" -c user.name=Dotfiles -c user.email=dotfiles@example.invalid commit -qm fixture
 
