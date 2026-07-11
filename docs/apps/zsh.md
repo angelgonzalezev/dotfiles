@@ -132,15 +132,15 @@ Then install the zsh config:
 
 ```sh
 cd ~/.config/dotfiles
-bin/dotfiles-install zsh
+bbldr dotfiles install --config-only zsh
 source ~/.zshrc
 ```
 
-The interactive bootstrap can also install Oh My Zsh and
+The interactive installer can also install Oh My Zsh and
 `zsh-autosuggestions` for you:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- zsh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh)" -- zsh
 ```
 
 Before installing this package on a machine that already has a large `.zshrc`,

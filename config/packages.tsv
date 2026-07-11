@@ -1,0 +1,5 @@
+package	default	dependency	docs	title	description
+nvim	1	cli	/apps/nvim	Neovim	Terminal editor, project search, buffers, and coding shortcuts.
+wezterm	1	wezterm	/apps/wezterm	WezTerm	Terminal UI, tabs, panes, fonts, and visual configuration.
+tmux	1	cli	/apps/tmux	tmux	Persistent sessions, reusable pane layouts, and status information.
+zsh	1	cli,shell	/apps/zsh	Zsh	Prompt, history, suggestions, PATH, and local overrides.

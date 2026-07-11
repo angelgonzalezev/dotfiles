@@ -36,14 +36,14 @@ tmux panes, and Neovim buffers differ.
 
 ## Update Local Configs
 
-Pull the latest changes:
+Pull the latest changes and run diagnostics:
 
 ```sh
-cd ~/.config/dotfiles
-git pull --ff-only
+bbldr dotfiles update
 ```
 
-If local files have uncommitted changes, commit or stash them before pulling.
+Update refuses to run when local files have uncommitted changes. Commit or
+stash them first.
 
 ## Edit Configs
 
@@ -95,8 +95,8 @@ git push
 Run:
 
 ```sh
-bin/dotfiles-doctor
-bin/dotfiles-check
+bbldr dotfiles doctor
+bbldr dotfiles check
 git status --short
 ```
 

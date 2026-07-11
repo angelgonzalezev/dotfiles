@@ -1,122 +1,37 @@
 # Contributing
 
-This project is open source and maintained by Angel Gonzalez. Contributions are
-welcome through pull requests when they improve the setup, documentation, safety,
-or maintainability of the project.
+This project is maintained by Angel Gonzalez and accepts focused pull requests
+that improve configuration, safety, documentation, tests, or portability.
 
-## What Good Contributions Look Like
+The canonical workflow lives in the repository
+[CONTRIBUTING.md](https://github.com/angelgonzalezev/dotfiles/blob/main/CONTRIBUTING.md).
 
-| Contribution | Good fit |
+## Local Validation
+
+```sh
+npm ci
+bbldr dotfiles check
+```
+
+From a fresh clone where `bbldr` is not registered yet:
+
+```sh
+bin/bbldr-dotfiles check
+```
+
+The suite validates shell scripts, isolated homes, dry-run, command collisions,
+install, restore, uninstall, docs links, application configs, VitePress, and
+Git whitespace.
+
+## Change Contract
+
+| Change | Required companion work |
 | --- | --- |
-| Documentation improvements | Better explanations, clearer install steps, missing shortcuts. |
-| Safer install logic | Better validation, clearer prompts, improved backups. |
-| App configuration | Focused improvements to existing packages. |
-| New package support | A well-scoped config package with docs and install support. |
+| New public command | Update command reference, help, and CLI tests. |
+| Installer behavior | Update install, security, recovery docs, and isolated tests. |
+| Application behavior | Update its app page with exact commands and shortcuts. |
+| New package | Use scaffold, complete registry metadata, docs, assets, and lifecycle tests. |
+| Agent workflow | Update the neutral playbook and both skill entry points. |
 
-::: info Project style
-This repo is intentionally conservative. It should contain curated config that
-is safe to publish and useful across machines.
-:::
-
-## Before Committing
-
-Run:
-
-```sh
-bin/dotfiles-doctor
-bin/dotfiles-check
-git status --short
-```
-
-The equivalent npm entry point is `npm run check`.
-
-Review every file before staging it:
-
-```sh
-git diff
-```
-
-Do not commit:
-
-```text
-credentials
-tokens
-SSH keys
-local state
-caches
-logs
-generated dependency folders
-machine-specific private paths
-```
-
-## Commit Flow
-
-```sh
-git add -- <files>
-git diff --cached
-git commit -m "Update dotfiles"
-git push
-```
-
-## Pull Request Flow
-
-1. Fork the repository.
-2. Create a branch.
-3. Make a focused change.
-4. Update docs when behavior changes.
-5. Run checks.
-6. Open a pull request explaining what changed and why.
-
-Recommended branch naming:
-
-```text
-docs/improve-install-guide
-config/update-tmux-layouts
-fix/bootstrap-backups
-```
-
-## Useful Checks
-
-```sh
-git diff
-git diff --cached
-git ls-files
-npm run docs:build
-bash -n bin/bootstrap
-bash -n bin/dotfiles-install
-bash -n bin/dotfiles-restore
-zsh -n zsh/.zshrc
-```
-
-## Documentation Changes
-
-When adding or changing behavior, update the relevant docs:
-
-| Change | Update |
-| --- | --- |
-| New app package | `docs/apps/<app>.md`, install docs, repository layout. |
-| New command | `docs/reference/commands.md`. |
-| New install behavior | `docs/getting-started/install.md`. |
-| New safety behavior | `docs/guides/backups-and-restore.md`. |
-
-## Continuous Integration
-
-GitHub Actions runs the local check suite on macOS and Ubuntu. Pull requests
-It also runs the isolated installer tests inside Debian 12. Pull requests must
-preserve:
-
-```text
-shell syntax and ShellCheck
-isolated install and restore behavior
-Neovim configuration loading
-VitePress production build
-clean Git whitespace
-```
-
-When changing bootstrap or restore behavior, add a temporary-home regression
-case to `tests/install-restore.sh`.
-
-## License
-
-This project uses the MIT License. You can use it, copy it, modify it, and
-distribute your own version, as long as the license terms are preserved.
+Never commit secrets, credentials, histories, caches, generated application
+state, or machine-specific private paths.

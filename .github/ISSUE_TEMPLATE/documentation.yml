@@ -1,0 +1,17 @@
+name: Documentation improvement
+description: Report missing, unclear, or incorrect documentation.
+title: "docs: "
+labels: [documentation]
+body:
+  - type: textarea
+    id: page
+    attributes:
+      label: Page or topic
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+    validations:
+      required: true

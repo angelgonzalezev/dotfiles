@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dotfiles Add App"
+  short_description: "Add a configured dotfiles application"
+  default_prompt: "Use $dotfiles-add-app to add a new application package with config, docs, registry metadata, and tests."

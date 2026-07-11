@@ -3,7 +3,7 @@
 Start with the project doctor:
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-doctor
+~/.local/bin/bbldr dotfiles doctor
 ```
 
 It checks required commands, optional applications, managed paths, Git status,
@@ -66,7 +66,7 @@ Reinstall all tmux links if the command is absent:
 
 ```sh
 cd ~/.config/dotfiles
-bin/dotfiles-install tmux
+bbldr dotfiles install --config-only tmux
 ```
 
 ## A Custom Shortcut Does Not Work
@@ -86,17 +86,18 @@ For tmux changes, reload with `Ctrl+a`, then `r`. For WezTerm changes, press
 ## Config Is Present But Not Linked
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-doctor
+~/.local/bin/bbldr dotfiles doctor
 cd ~/.config/dotfiles
 stow --simulate --verbose --no-folding --target="$HOME" nvim wezterm tmux zsh
 ```
 
-Use bootstrap rather than direct Stow if the simulation reports conflicts.
+Use `bbldr dotfiles install` rather than direct Stow if the simulation reports
+conflicts.
 
 ## Repository Cannot Update
 
-Bootstrap uses `git pull --ff-only`. Local changes or diverging history can
-stop the update to avoid overwriting your work:
+`bbldr dotfiles update` uses `git pull --ff-only`. Local changes or diverging
+history can stop the update to avoid overwriting your work:
 
 ```sh
 cd ~/.config/dotfiles
@@ -104,12 +105,12 @@ git status --short
 git diff
 ```
 
-Commit or stash intentional changes before rerunning bootstrap.
+Commit or stash intentional changes before running update again.
 
 ## Restore The Previous Setup
 
 Follow [Backups and Restore](/guides/backups-and-restore). The usual command is:
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest
+~/.local/bin/bbldr dotfiles restore --backup latest
 ```

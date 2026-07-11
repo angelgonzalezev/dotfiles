@@ -1,199 +1,140 @@
 # Commands
 
-This page collects every project-provided executable and the main external
-commands used by the installer, daily workflow, tmux, Zsh, and terminal setup.
+`bbldr` is the Become Builder dispatcher. The second word selects an installed
+module and the third selects a command from that module.
 
-Project scripts under `bin/` are run from the repository. Commands installed by
-the `tmux` package live in `~/.local/bin` and can be run from any directory
-because the Zsh package adds that directory to `PATH`.
-
-## `bin/bootstrap`
-
-Full installer. It can install dependencies, update the repo, back up existing
-config files, and link packages.
-
-Quick install:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
+```text
+bbldr dotfiles doctor
+  |     |        `-- command
+  |     `----------- module
+  `----------------- dispatcher
 ```
 
-This mode links dotfiles packages and installs `stow` if needed. It does not ask
-interactive questions because the script is streamed through standard input.
+## Ecosystem Commands
 
-Interactive remote run:
-
-```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
-```
-
-This mode can ask before installing CLI tools, WezTerm, Oh My Zsh,
-JetBrainsMono Nerd Font, `zsh-autosuggestions`, and dotfiles packages.
-
-Non-interactive run that accepts every install step:
-
-```sh
-DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
-```
-
-Install selected packages only:
-
-```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- nvim tmux zsh
-```
-
-Useful environment variables:
-
-```sh
-DOTFILES_REPO_URL=https://github.com/angelgonzalezev/dotfiles.git
-DOTFILES_DIR=~/.config/dotfiles
-DOTFILES_BACKUP_DIR=~/.config/dotfiles-backups
-DOTFILES_ASSUME_YES=1
-```
-
-| Exit result | Meaning |
+| Command | Purpose |
 | --- | --- |
-| `0` | Installation or intentional skip completed successfully. |
-| Non-zero | A requirement, update, backup, simulation, or Stow step failed. |
+| `bbldr help` | Show dispatcher usage. |
+| `bbldr version` | Print dispatcher version. |
+| `bbldr modules` | Discover `bbldr-*` modules available in `PATH`. |
+| `bbldr <module> help` | Show commands belonging to one module. |
 
-On a linking failure, bootstrap attempts rollback before returning a non-zero
-status. The final output always includes the installation record and restore
-command after a successful config install.
+Unknown modules return exit code `127`; unknown module commands return `2`.
 
-## `bin/dotfiles-install`
-
-Links packages into `$HOME` with GNU Stow.
+## Install
 
 ```sh
-bin/dotfiles-install
-bin/dotfiles-install nvim
-bin/dotfiles-install wezterm
-bin/dotfiles-install tmux
-bin/dotfiles-install zsh
+bbldr dotfiles install
+bbldr dotfiles install nvim
+bbldr dotfiles install tmux zsh
+bbldr dotfiles install --config-only nvim
+bbldr dotfiles install --dry-run
+bbldr dotfiles install --yes
 ```
-
-This command never installs apps. It only creates symlinks.
-
-Unlike bootstrap, it does not create a backup manifest. Use bootstrap when
-installing on a machine with existing configuration.
-
-## `bin/dotfiles-restore`
-
-Safely removes managed links and restores files recorded by bootstrap:
-
-```sh
-bin/dotfiles-restore --backup latest
-bin/dotfiles-restore --backup latest --yes
-bin/dotfiles-restore --backup <timestamp> tmux zsh
-```
-
-It refuses to overwrite files that no longer point to this repository.
-
-Options:
 
 | Option | Behavior |
 | --- | --- |
-| `--backup latest` | Use the latest installation that changed a target. This is the default. |
-| `--backup <timestamp>` | Select an exact installation record. |
-| `--yes` / `-y` | Skip the interactive confirmation. |
-| `--help` / `-h` | Print command usage. |
-| Package names | Restore only `nvim`, `wezterm`, `tmux`, or `zsh`. |
+| `--dry-run` | Print dependencies, target states, and backups without writing. |
+| `--config-only` | Skip optional dependency groups and install selected links. |
+| `--yes`, `-y` | Accept prompts for non-interactive automation. |
+| Package names | Limit configuration linking to the selected packages. |
 
-## Maintenance Commands
+With no package names, every default package in `config/packages.tsv` is used.
 
-| Command | Purpose |
-| --- | --- |
-| `bin/dotfiles-doctor` | Checks required/optional commands, managed links, Git status, and suspicious tracked filenames. |
-| `bin/dotfiles-status` | Shows compact Git status for the repo. |
-| `bin/dotfiles-sync` | Shows status and prints the manual commit/push flow. |
-| `bin/dotfiles-check` | Runs syntax, install/restore, config, docs, and whitespace checks. |
+## Update And Status
 
 ```sh
-bin/dotfiles-doctor
-bin/dotfiles-status
-bin/dotfiles-sync
-bin/dotfiles-check
+bbldr dotfiles update
+bbldr dotfiles status
 ```
 
-`bin/dotfiles-check` is the broadest contributor check. It validates Bash and
-Zsh syntax, isolated install/restore scenarios, documentation links, WezTerm,
-Neovim, tmux when sockets are available, VitePress, and Git whitespace.
+`update` refuses to proceed when the repository contains local changes. It
+performs a fast-forward-only pull, refreshes the global commands, and runs the
+doctor. `status` never modifies anything; it shows Git state, managed targets,
+and the latest restore point.
 
-## tmux Layout Commands
-
-| Command | Purpose |
-| --- | --- |
-| `tmux-dev` | Opens or attaches to a tmux session named `dev` with two panes side by side. |
-| `tmux-agent` | Opens or attaches to a tmux session named `agent` with four panes in a tiled layout. |
+## Doctor
 
 ```sh
-tmux-dev
-tmux-dev project-api
-tmux-agent
-tmux-agent content-workflow
-tmux-dev project-api "$HOME/Projects/api"
-tmux-agent agents "$HOME/Projects/automation"
+bbldr dotfiles doctor
 ```
 
-Both commands accept `[session-name] [starting-directory]`. Existing sessions
-are reused instead of rebuilding their panes.
+The doctor checks required and optional commands, the `bbldr` installation,
+every target from the package registry, Git state, and suspicious tracked file
+names. It returns non-zero when required checks fail.
 
-## tmux Status Bar Commands
-
-| Command | Purpose |
-| --- | --- |
-| `~/.local/bin/tmux-status` | Prints the dynamic right-side tmux status segments. |
-| `tmux source-file ~/.tmux.conf` | Reloads tmux configuration. |
-| `tmux show-options -g status-right` | Shows the current right-side status configuration. |
-| `bin/dotfiles-install tmux` | Reinstalls tmux symlinks, including `tmux-status`. |
-| `tmux list-keys MouseUp1Control0` | Shows the CPU segment click binding. |
+## Backups And Restore
 
 ```sh
-~/.local/bin/tmux-status
-tmux source-file ~/.tmux.conf
-tmux show-options -g status-right
-tmux list-keys MouseUp1Control0
+bbldr dotfiles backups
+bbldr dotfiles restore --backup latest
+bbldr dotfiles restore --backup latest --yes
+bbldr dotfiles restore --backup 20260711-154500 tmux zsh
 ```
 
-## Common tmux Commands
+| Restore option | Behavior |
+| --- | --- |
+| `--backup latest` | Use the latest installation that changed a target. |
+| `--backup <id>` | Use an exact installation record. |
+| `--yes`, `-y` | Skip restore confirmation. |
+| Package names | Restore only selected packages from the record. |
+
+Restore refuses to replace a path modified after installation.
+
+## Uninstall
+
+```sh
+bbldr dotfiles uninstall
+bbldr dotfiles uninstall tmux
+bbldr dotfiles uninstall --yes nvim zsh
+```
+
+Uninstall finds the original configuration-changing record for every selected
+package, removes managed links, and restores previous files. It keeps installed
+applications, the repository, `bbldr`, and all backup records.
+
+## Contributor Commands
+
+```sh
+bbldr dotfiles scaffold app myapp
+bbldr dotfiles check
+npm run check
+```
+
+`scaffold` adds package metadata, a default `~/.config/<name>` mapping, an empty
+source directory, and an application documentation template. Add real config
+files and tests before installing or opening a PR.
+
+`check` runs shell syntax, ShellCheck when available, isolated CLI/install/
+restore/uninstall tests, documentation validation, application config parsing,
+the VitePress build, and Git whitespace checks.
+
+## tmux Layouts
 
 | Command | Purpose |
 | --- | --- |
-| `tmux` | Start a new session. |
+| `tmux-dev [name] [directory]` | Attach to or create a two-pane session. |
+| `tmux-agent [name] [directory]` | Attach to or create a four-pane session. |
 | `tmux ls` | List sessions. |
-| `tmux attach` | Attach to the latest session. |
-| `tmux attach -t dev` | Attach to a named session. |
-| `tmux new -s dev` | Create a named session. |
-| `tmux kill-session` | Close the current session. |
-| `tmux kill-session -t dev` | Close a named session. |
+| `tmux attach -t dev` | Attach to a session. |
+| `tmux kill-session -t dev` | Close one session. |
 | `tmux kill-server` | Close every tmux session. |
-| `exit` | Close the current shell or pane. |
-| `tmux display-message -p '#S:#I.#P'` | Print current session, window, and pane identifiers. |
+| `exit` | Close the active shell or pane. |
 
 ::: warning
-Use `tmux kill-server` only when you want to close every tmux session at once.
+`tmux kill-server` terminates every tmux session and every process running in
+those sessions.
 :::
 
-## Shell And Terminal Commands
-
-| Command | Purpose |
-| --- | --- |
-| `source ~/.zshrc` | Reload Zsh config after editing. |
-| `open -a WezTerm` | Open WezTerm from a shell. |
-| `open -a WezTerm ~/Desktop` | Open WezTerm in the Desktop folder. |
-| `command -v tmux-dev` | Check that local tmux commands are available. |
-| `zsh -n ~/.zshrc` | Validate Zsh syntax without starting an interactive shell. |
-| `wezterm show-keys` | Print effective WezTerm shortcuts. |
-| `wezterm ls-fonts` | Print fonts visible to WezTerm. |
-| `nvim --headless -i NONE -u ~/.config/nvim/init.lua +qa` | Load Neovim config without opening the UI. |
-
-## Git Workflow Commands
+## Shell, Terminal, And Editor Checks
 
 ```sh
-cd ~/.config/dotfiles
-git status --short
-git diff
-git add -- <files>
-git commit -m "Update dotfiles"
-git push
+source ~/.zshrc
+command -v bbldr tmux-dev tmux-agent
+zsh -n ~/.zshrc
+wezterm show-keys
+wezterm ls-fonts
+nvim --headless -i NONE -u ~/.config/nvim/init.lua +qa
 ```
+
+See the individual application pages for their complete custom shortcuts.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dotfiles Review"
+  short_description: "Review dotfiles safety and behavior"
+  default_prompt: "Use $dotfiles-review to review a dotfiles change for safety, regressions, documentation, and missing tests."

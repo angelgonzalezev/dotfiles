@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dotfiles Contribute"
+  short_description: "Prepare a safe dotfiles contribution"
+  default_prompt: "Use $dotfiles-contribute to implement and validate a focused contribution to this dotfiles repository."

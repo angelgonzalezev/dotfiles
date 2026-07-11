@@ -1,0 +1,8 @@
+package	target	source
+nvim	.config/nvim	nvim/.config/nvim
+wezterm	.config/wezterm	wezterm/.config/wezterm
+tmux	.tmux.conf	tmux/.tmux.conf
+tmux	.local/bin/tmux-dev	tmux/.local/bin/tmux-dev
+tmux	.local/bin/tmux-agent	tmux/.local/bin/tmux-agent
+tmux	.local/bin/tmux-status	tmux/.local/bin/tmux-status
+zsh	.zshrc	zsh/.zshrc

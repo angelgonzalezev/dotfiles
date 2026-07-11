@@ -1,127 +1,87 @@
-# Managing Configurations
+# Managing Configuration Packages
 
-This project is organized as packages. A package is a top-level folder that
-mirrors where files should live from `$HOME`.
-
-::: info Example
-`nvim/.config/nvim/init.lua` becomes `~/.config/nvim/init.lua` when installed.
-:::
-
-## Add A New Package
-
-Create a package that mirrors the final path from `$HOME`.
-
-Example for a fictional app:
+Each application is a GNU Stow package whose source paths mirror their final
+location below `$HOME`.
 
 ```text
-myapp/
-  .config/
-    myapp/
-      config.toml
+nvim/.config/nvim/init.lua -> ~/.config/nvim/init.lua
+tmux/.tmux.conf            -> ~/.tmux.conf
 ```
 
-Then update:
+## Package Registry
+
+Two tab-separated files are the source of truth:
+
+| File | Content |
+| --- | --- |
+| `config/packages.tsv` | Name, default selection, dependency group, docs, title, and description. |
+| `config/targets.tsv` | Package, target relative to `$HOME`, and source relative to the repo. |
+
+Install, restore, uninstall, doctor, tests, and the documentation sidebar read
+these files. Adding a package should not require editing command-specific lists.
+
+## Scaffold An Application
+
+```sh
+bbldr dotfiles scaffold app myapp
+```
+
+This creates a default mapping:
 
 ```text
-bin/dotfiles-install
-bin/bootstrap
-bin/dotfiles-restore
-docs/index.md
-docs/getting-started/overview.md
-docs/getting-started/install.md
-docs/reference/repository-layout.md
-README.md
+myapp/.config/myapp -> ~/.config/myapp
 ```
 
-If the app needs documentation, add:
+It also adds registry entries and `docs/apps/myapp.md`. The source directory is
+intentionally empty: add the application's real configuration before testing.
 
-```text
-docs/apps/myapp.md
-```
-
-A complete package contribution should define:
+Then complete these areas:
 
 | Area | Requirement |
 | --- | --- |
-| Repository layout | Source paths mirror their final location below `$HOME`. |
-| Bootstrap | Package name, conflict targets, source paths, and backup behavior. |
-| Installation | Default selection when appropriate and Stow compatibility. |
-| Restore | Every target appears in the installation manifest. |
-| Documentation | Purpose, official resources, configured behavior, commands, and troubleshooting. |
-| Tests | Clean install, existing target, reinstall, and restore scenarios. |
+| Configuration | Add only portable, useful source files. |
+| Dependencies | Add platform-aware installation only when automatic support is safe. |
+| Documentation | Explain purpose, official resources, exact behavior, shortcuts, and recovery. |
+| Tests | Cover a clean target, an existing target, reinstall, restore, and uninstall. |
+| UI | Add a real logo or screenshot when it helps users identify the application. |
 
-Do not add application caches, session state, generated indexes, histories,
-credentials, or machine-specific paths to a package.
-
-## Install A Package
-
-From the repo root:
+Run:
 
 ```sh
-bin/dotfiles-install nvim
-bin/dotfiles-install wezterm
-bin/dotfiles-install tmux
-bin/dotfiles-install zsh
+bbldr dotfiles check
 ```
 
-Install multiple packages:
+## Install And Remove A Package
 
 ```sh
-bin/dotfiles-install nvim tmux zsh
+bbldr dotfiles install --config-only nvim
+bbldr dotfiles uninstall nvim
 ```
 
-## Remove A Package
+Use install rather than raw `stow` because it creates a restore manifest and
+backs up conflicts. Use uninstall rather than `stow --delete` because it knows
+how to recover the previous configuration.
 
-Unlink it with Stow:
+## Keep Local Values Private
 
-```sh
-stow --no-folding --target="$HOME" --delete <package>
-```
-
-Then remove the package from the repo and update the docs.
-
-For an end user returning to a pre-install configuration, prefer the
-manifest-aware restore command instead:
-
-```sh
-bin/dotfiles-restore --backup latest <package>
-```
-
-## Keep Local Config Out Of Git
-
-Some config is personal to one machine. Keep it out of tracked packages.
-
-Use:
+Machine-specific Zsh configuration belongs in:
 
 ```text
 ~/.zshrc.local
 ```
 
-Good candidates:
+Examples include private aliases, SDK paths, work credentials, tokens, and
+tool-generated environment variables. The tracked `.zshrc` loads this file at
+the end but the repository never manages it.
 
-```text
-private aliases
-local SDK paths
-work-only environment variables
-tokens
-credentials
-machine-specific paths
-```
-
-::: warning Before publishing
-Run `bin/dotfiles-doctor` and review `git diff --cached` before pushing.
-:::
-
-## Understand Ownership Before Editing
-
-Check whether a live path belongs to this repository:
+## Inspect Ownership
 
 ```sh
+bbldr dotfiles status
 readlink ~/.zshrc
 readlink ~/.tmux.conf
 readlink ~/.config/nvim/init.lua
 ```
 
-If `readlink` prints a path inside `~/.config/dotfiles`, editing the live path
-changes the Git working tree. If it prints nothing, the path is a regular local
-file and is not currently managed by Stow.
+When a path points inside `~/.config/dotfiles`, editing the live path edits the
+Git working tree. A regular local file is not managed by Stow.

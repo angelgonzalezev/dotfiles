@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dotfiles Document"
+  short_description: "Document verified dotfiles behavior"
+  default_prompt: "Use $dotfiles-document to document a dotfiles command, application, shortcut, or workflow from verified sources."

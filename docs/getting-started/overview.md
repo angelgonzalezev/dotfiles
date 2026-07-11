@@ -20,7 +20,7 @@ This project is useful if you:
 
 | You want to... | This project helps by... |
 | --- | --- |
-| Set up a new Mac or Linux machine faster | Providing a bootstrap installer and documented packages. |
+| Set up a new Mac or Linux machine faster | Providing an interactive installer and documented packages. |
 | Keep terminal configuration versioned | Storing shared config in Git instead of only on one machine. |
 | Work faster in the terminal | Providing Neovim, tmux, WezTerm, and Zsh defaults. |
 | Avoid forgetting shortcuts | Documenting the most used commands per app. |
@@ -96,7 +96,7 @@ Depending on what you choose during installation, the project can:
 | --- | --- |
 | Apps/tools | Install Stow, Neovim 0.10+, ripgrep, tmux, Zsh, WezTerm, a Nerd Font, Oh My Zsh, and suggestions. |
 | Config files | Link `nvim`, `wezterm`, `tmux`, and `zsh` configs into your home directory. |
-| Existing files | Move existing configs to `~/.config/dotfiles-backups/<timestamp>/`. |
+| Existing files | Move existing configs to `~/.config/bbldr/backups/dotfiles/<timestamp>/`. |
 | Shell behavior | Add `~/.local/bin` to `PATH` and show the `👼` prompt icon. |
 | tmux workflow | Add `tmux-dev` and `tmux-agent` workspace commands. |
 | Safety | Record every target and provide a package-aware restore command. |

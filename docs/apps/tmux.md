@@ -292,7 +292,7 @@ If the command does not exist, reinstall the `tmux` package:
 
 ```sh
 cd ~/.config/dotfiles
-bin/dotfiles-install tmux
+bbldr dotfiles install --config-only tmux
 tmux source-file ~/.tmux.conf
 ```
 

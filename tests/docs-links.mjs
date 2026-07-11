@@ -16,16 +16,46 @@ function walk(directory) {
   }
 }
 
+function markdownPage(file, target) {
+  if (target.startsWith('/')) {
+    const direct = join(docsRoot, `${target}.md`)
+    const index = join(docsRoot, target, 'index.md')
+    if (existsSync(direct)) return direct
+    if (existsSync(index)) return index
+    return null
+  }
+  const path = resolve(dirname(file), target)
+  return existsSync(path) ? path : null
+}
+
+function anchors(file) {
+  const seen = new Map()
+  return new Set(
+    [...readFileSync(file, 'utf8').matchAll(/^#{1,6}\s+(.+)$/gm)].map((match) => {
+      const base = match[1]
+        .replace(/<[^>]+>/g, '')
+        .replace(/[`*_~]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^\p{L}\p{N}\s-]/gu, '')
+        .replace(/\s+/g, '-')
+      const count = seen.get(base) ?? 0
+      seen.set(base, count + 1)
+      return count === 0 ? base : `${base}-${count}`
+    })
+  )
+}
+
 function targetExists(file, rawTarget) {
-  const target = rawTarget.split('#')[0].split('?')[0]
+  const [withoutAnchor, anchor] = rawTarget.split('#')
+  const target = withoutAnchor.split('?')[0]
   if (!target || /^(https?:|mailto:)/.test(target) || target.includes('<')) return true
   if (target.startsWith('/images/') || target.startsWith('/fonts/')) {
     return existsSync(join(docsRoot, 'public', target))
   }
-  if (target.startsWith('/')) {
-    return existsSync(join(docsRoot, `${target}.md`)) || existsSync(join(docsRoot, target, 'index.md'))
-  }
-  return existsSync(resolve(dirname(file), target))
+  const page = markdownPage(file, target)
+  if (!page) return false
+  return !anchor || !page.endsWith('.md') || anchors(page).has(decodeURIComponent(anchor).toLowerCase())
 }
 
 walk(docsRoot)
@@ -41,6 +71,36 @@ for (const file of markdownFiles) {
 
   for (const target of targets) {
     if (!targetExists(file, target)) failures.push(`${file.replace(`${root}/`, '')}: ${target}`)
+  }
+}
+
+const packages = readFileSync(join(root, 'config', 'packages.tsv'), 'utf8')
+  .trim()
+  .split('\n')
+  .slice(1)
+  .map((line) => line.split('\t'))
+
+for (const [name, , , docs] of packages) {
+  if (!existsSync(join(root, name))) failures.push(`config/packages.tsv: missing package directory ${name}`)
+  if (!markdownPage(join(root, 'README.md'), docs)) failures.push(`config/packages.tsv: missing docs page ${docs}`)
+}
+
+const targetRows = readFileSync(join(root, 'config', 'targets.tsv'), 'utf8').trim().split('\n').slice(1)
+for (const row of targetRows) {
+  const [name, , source] = row.split('\t')
+  if (!packages.some(([packageName]) => packageName === name)) failures.push(`config/targets.tsv: unknown package ${name}`)
+  if (!existsSync(join(root, source))) failures.push(`config/targets.tsv: missing source ${source}`)
+}
+
+const legacyPatterns = [
+  /bin\/bootstrap/,
+  /bin\/dotfiles-(?:install|restore|doctor|status|sync|check)/,
+  /\.config\/dotfiles-backups/
+]
+for (const file of markdownFiles) {
+  const content = readFileSync(file, 'utf8')
+  for (const pattern of legacyPatterns) {
+    if (pattern.test(content)) failures.push(`${file.replace(`${root}/`, '')}: legacy command or path ${pattern}`)
   }
 }
 

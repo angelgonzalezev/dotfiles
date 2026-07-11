@@ -55,22 +55,20 @@ readlink ~/.config/nvim/init.lua
 
 ## Project Commands
 
-Use the wrapper for normal relinking:
+Use the project CLI for safe linking:
 
 ```sh
-cd ~/.config/dotfiles
-bin/dotfiles-install
-bin/dotfiles-install nvim
-bin/dotfiles-install nvim tmux zsh
+bbldr dotfiles install --config-only
+bbldr dotfiles install --config-only nvim
+bbldr dotfiles install --config-only nvim tmux zsh
 ```
 
-The wrapper selects `$HOME`, enables `--no-folding`, and defaults to every
-project package when no package is supplied.
+The CLI selects `$HOME`, enables `--no-folding`, creates a restore manifest,
+and defaults to every configured package when no package is supplied.
 
-::: warning Relinking is not a safe first install
-`bin/dotfiles-install` does not back up conflicts. On a new machine or after
-creating unrelated config files, use `bin/bootstrap`; it records and moves
-conflicting targets before calling Stow.
+::: tip Prefer the project CLI
+`bbldr dotfiles install` backs up conflicts and simulates Stow before linking.
+Direct Stow commands are useful for diagnosis, not the normal user workflow.
 :::
 
 ## Simulate Before Linking
@@ -82,7 +80,7 @@ cd ~/.config/dotfiles
 stow --simulate --verbose --no-folding --target="$HOME" nvim
 ```
 
-The bootstrap runs a simulation automatically after creating its backup and
+The installer runs a simulation automatically after creating its backup and
 before performing the real install.
 
 ## Unlink A Package
@@ -99,7 +97,7 @@ rollback, use the project restore command instead because it also returns the
 configuration saved before installation:
 
 ```sh
-bin/dotfiles-restore --backup latest nvim
+bbldr dotfiles restore --backup latest nvim
 ```
 
 ## Conflicts
@@ -112,13 +110,14 @@ WARNING! stowing nvim would cause conflicts
 ```
 
 Do not use `--adopt` unless you understand that it can move target content into
-the repository. The supported solution is to run bootstrap so the original is
-placed in a timestamped backup and can be restored later.
+the repository. The supported solution is to use the project installer so the
+original is placed in a timestamped backup and can be restored later. Use
+`bbldr dotfiles install` for that workflow.
 
 ## Verify All Managed Links
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-doctor
+bbldr dotfiles doctor
 ```
 
 The doctor reports whether each expected target is linked, missing, or present

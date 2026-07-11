@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# bbldr-dispatcher: become-builder
+set -euo pipefail
+
+version="0.1.0"
+dispatcher_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+  cat <<'EOF'
+Usage: bbldr <module> [command] [options]
+
+Become Builder command-line ecosystem.
+
+Commands:
+  modules      List installed modules
+  version      Print dispatcher version
+  help         Show this help
+
+Run "bbldr <module> help" for module-specific commands.
+EOF
+}
+
+list_modules() {
+  local directory candidate module
+  local -a modules=()
+  while IFS= read -r directory; do
+    [ -n "$directory" ] || directory=.
+    [ -d "$directory" ] || continue
+    for candidate in "$directory"/bbldr-*; do
+      [ -x "$candidate" ] || continue
+      module="${candidate##*/bbldr-}"
+      case " ${modules[*]-} " in *" $module "*) ;; *) modules+=("$module") ;; esac
+    done
+  done < <(printf '%s\n' "$dispatcher_dir:$PATH" | tr ':' '\n')
+
+  if [ "${#modules[@]}" -eq 0 ]; then
+    echo "No bbldr modules are installed."
+    return
+  fi
+  printf '%s\n' "${modules[@]}" | sort
+}
+
+command_name="${1:-help}"
+case "$command_name" in
+  help|-h|--help) usage ;;
+  version|-v|--version) printf 'bbldr %s\n' "$version" ;;
+  modules) list_modules ;;
+  -*) echo "Unknown option: $command_name" >&2; usage >&2; exit 2 ;;
+  *)
+    shift
+    module_command="bbldr-$command_name"
+    if [ -x "$dispatcher_dir/$module_command" ]; then
+      exec "$dispatcher_dir/$module_command" "$@"
+    fi
+    if ! command -v "$module_command" >/dev/null 2>&1; then
+      echo "Unknown bbldr module: $command_name" >&2
+      echo "Run \"bbldr modules\" to list installed modules." >&2
+      exit 127
+    fi
+    exec "$module_command" "$@"
+    ;;
+esac

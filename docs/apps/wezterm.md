@@ -218,7 +218,7 @@ the terminal window.
 | `wezterm ls-fonts \| rg 'JetBrainsMono Nerd Font'` | Verify the configured Nerd Font. |
 
 When the Lua file contains an error, WezTerm displays a configuration error
-instead of applying the broken reload. Run `bin/dotfiles-check` from the repo
+instead of applying the broken reload. Run `bbldr dotfiles check` from the repo
 to parse the same file before publishing it.
 
 ::: info WezTerm vs tmux

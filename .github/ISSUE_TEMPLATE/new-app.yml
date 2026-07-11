@@ -1,0 +1,24 @@
+name: New application
+description: Propose a new configuration package.
+title: "app: "
+labels: [enhancement]
+body:
+  - type: input
+    id: app
+    attributes:
+      label: Application
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Workflow value
+      description: Explain the problem it solves and why it belongs in this opinionated setup.
+    validations:
+      required: true
+  - type: textarea
+    id: platforms
+    attributes:
+      label: Platform and installation support
+    validations:
+      required: true

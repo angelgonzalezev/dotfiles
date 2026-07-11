@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     strategy:
@@ -32,6 +35,6 @@ jobs:
       - name: Test install and restore on Debian 12
         if: runner.os == 'Linux'
         run: docker run --rm -v "$PWD:/work" -w /work debian:12-slim bash -c "apt-get update && apt-get install -y curl git stow tar && tests/install-restore.sh"
-      - run: bin/dotfiles-check
+      - run: bin/bbldr-dotfiles check
         env:
-          DOTFILES_SKIP_DOCS: ${{ matrix.os == 'macos-latest' && '1' || '0' }}
+          BBLDR_SKIP_DOCS: ${{ matrix.os == 'macos-latest' && '1' || '0' }}

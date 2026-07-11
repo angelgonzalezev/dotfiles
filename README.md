@@ -1,176 +1,135 @@
 # dotfiles
 
-My personal workspace for terminal setup, workflow, and documentation, built to
-make development faster, cleaner, and easier to maintain.
+An open source terminal workspace created by Angel Gonzalez to make development
+faster, cleaner, reproducible, and easier to maintain.
 
-Created by [Angel Gonzalez](https://www.youtube.com/@byangelgonzalez). Licensed
-under MIT. See [LICENSE](LICENSE).
+It installs and documents an opinionated configuration for Neovim, WezTerm,
+tmux, and Zsh on macOS and Ubuntu/Debian. GNU Stow links the tracked files into
+the user's home directory without copying them.
 
-## What This Project Is
+Created by [Angel Gonzalez](https://www.youtube.com/@byangelgonzalez) and
+licensed under the [MIT License](LICENSE).
 
-This is an open source dotfiles repository for macOS and Ubuntu/Debian. It
-stores the configuration for the tools I use to work in the terminal: Neovim,
-WezTerm, tmux, and Zsh.
+## What It Solves
 
-The goal is to make a development machine reproducible. Instead of configuring
-every app manually on every computer, the configuration lives in Git, can be
-installed with scripts, and is documented in one place.
-
-## What It Helps With
-
-| Problem | Solution |
+| Problem | How this workspace helps |
 | --- | --- |
-| Setting up a new machine takes too long. | Bootstrap can install tools and link config files on supported macOS and Linux systems. |
-| Terminal shortcuts are easy to forget. | The docs explain the commands used daily. |
-| Config files drift between machines. | Shared config is versioned and symlinked with Stow. |
-| Local machine config can leak into Git. | Local-only shell config lives in `~/.zshrc.local`. |
-| Terminal work gets disorganized. | tmux layouts and WezTerm tabs create repeatable workspaces. |
-
-## Managed Packages
-
-| Package | Installs config for | Main benefit |
-| --- | --- | --- |
-| `nvim` | Neovim 0.10+ and ripgrep | Keyboard-first editor with project search and plugins. |
-| `wezterm` | WezTerm | Terminal UI, tabs, theme, font, and navigation. |
-| `tmux` | tmux | Persistent sessions, panes, and workspace layout commands. |
-| `zsh` | Zsh / Oh My Zsh | Prompt, history, suggestions, and local command path. |
+| Rebuilding a terminal setup takes time. | One installer applies the complete environment. |
+| Existing configuration could be lost. | Conflicts are backed up before links are created. |
+| Terminal commands are easy to forget. | The documentation records the actual shortcuts and workflows. |
+| Config drifts between computers. | Shared files remain versioned in Git and linked with Stow. |
+| Recovery is unclear. | Every installation produces a manifest that supports safe restore and uninstall. |
+| Contributors repeat manual steps. | A package registry, scaffold command, tests, and agent skills define the workflow. |
 
 ## Install
 
-Run the interactive installer from any terminal:
+Run the interactive installer from any directory:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh)"
 ```
 
-The installer can ask before installing CLI tools, WezTerm, JetBrainsMono Nerd
-Font, Oh My Zsh, `zsh-autosuggestions`, and selected dotfiles packages.
+The installer detects the platform, asks which dependencies to install, shows
+every target and backup action, and requests a final confirmation.
 
-Install the default configuration packages without interactive prompts:
+Preview the same plan without changing the system:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh)" -- --dry-run
 ```
 
-Run every install step without prompts:
+After installation, the workspace can be managed from any directory:
 
 ```sh
-DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+bbldr dotfiles status
+bbldr dotfiles doctor
+bbldr dotfiles update
+bbldr dotfiles backups
+bbldr dotfiles restore --backup latest
 ```
 
-To install only one package:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- nvim
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- wezterm
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- tmux
-curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- zsh
-```
-
-Existing config files are backed up automatically to:
+Existing configuration is stored under:
 
 ```text
-~/.config/dotfiles-backups/
+~/.config/bbldr/backups/dotfiles/
 ```
 
-Restore the previous configuration at any time:
+Read the [complete installation guide](docs/getting-started/install.md) before
+using automatic mode on a machine with an existing terminal setup.
 
-```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest
+## What Gets Configured
+
+| Package | Result |
+| --- | --- |
+| `nvim` | Neovim plugins, project search, navigation, buffers, statusline, and common editing shortcuts. |
+| `wezterm` | Terminal theme, font, opacity, padding, title controls, tabs, and keyboard navigation. |
+| `tmux` | Prefix, windows, panes, persistent sessions, layouts, status bar, and helper commands. |
+| `zsh` | Prompt, shared history, suggestions, Homebrew activation, local commands, and private overrides. |
+
+The installer can also install GNU Stow, Neovim 0.10+, ripgrep, tmux, Zsh,
+WezTerm, JetBrainsMono Nerd Font, Oh My Zsh, and zsh-autosuggestions.
+
+## The `bbldr` Ecosystem
+
+`bbldr` is a small dispatcher for Become Builder tools. This repository adds
+the `dotfiles` module through an executable named `bbldr-dotfiles`.
+
+```text
+bbldr dotfiles doctor
+  |     |        `-- module command
+  |     `----------- installed module
+  `----------------- ecosystem dispatcher
 ```
 
-See the [complete install guide](docs/getting-started/install.md) for supported
-systems, dependencies, safety behavior, and verification.
+Future repositories can add their own `bbldr-<module>` executable without
+changing this project.
 
 ## Documentation
 
-Start here:
-
-- [Docs index](docs/index.md)
 - [Overview](docs/getting-started/overview.md)
 - [Install](docs/getting-started/install.md)
-- [Daily Workflow](docs/getting-started/daily-workflow.md)
-
-Apps:
-
-- [GNU Stow](docs/apps/stow.md)
-- [Neovim](docs/apps/nvim.md)
-- [WezTerm](docs/apps/wezterm.md)
-- [tmux](docs/apps/tmux.md)
-- [Zsh](docs/apps/zsh.md)
-
-Guides:
-
-- [Backups and Restore](docs/guides/backups-and-restore.md)
+- [Daily workflow](docs/getting-started/daily-workflow.md)
+- [FAQ](docs/getting-started/faq.md)
+- [Commands](docs/reference/commands.md)
+- [Backups and restore](docs/guides/backups-and-restore.md)
 - [Troubleshooting](docs/guides/troubleshooting.md)
-- [Managing Configurations](docs/guides/managing-configurations.md)
-- [macOS Terminal Shortcut](docs/guides/macos-terminal-shortcut.md)
+- [Security](docs/guides/security.md)
+- [Contributing](CONTRIBUTING.md)
 
-## Layout
-
-Packages are arranged for GNU Stow. Each package mirrors the target path from
-`$HOME`.
+## Repository Layout
 
 ```text
-nvim/
-  .config/
-    nvim/
-wezterm/
-  .config/
-    wezterm/
-tmux/
-  .tmux.conf
-  .local/
-    bin/
-      tmux-agent
-      tmux-dev
-      tmux-status
-zsh/
-  .zshrc
 bin/
-  bootstrap
-  dotfiles-check
-  dotfiles-doctor
-  dotfiles-install
-  dotfiles-restore
-  dotfiles-status
-  dotfiles-sync
-```
-
-## Relink After Installation
-
-After bootstrap runs once, the repo exists at `~/.config/dotfiles`. From there,
-you can relink config files without downloading the installer again.
-
-```sh
-brew install stow
-cd ~/.config/dotfiles
-bin/dotfiles-install
-```
-
-This links:
-
-```text
-~/.config/nvim/init.lua       -> ~/.config/dotfiles/nvim/.config/nvim/init.lua
-~/.config/wezterm/wezterm.lua -> ~/.config/dotfiles/wezterm/.config/wezterm/wezterm.lua
-~/.tmux.conf                  -> ~/.config/dotfiles/tmux/.tmux.conf
-~/.local/bin/tmux-*           -> ~/.config/dotfiles/tmux/.local/bin/tmux-*
-~/.zshrc                      -> ~/.config/dotfiles/zsh/.zshrc
+  bbldr                 Generic Become Builder dispatcher
+  bbldr-dotfiles        Dotfiles module and commands
+config/
+  packages.tsv          Package metadata
+  targets.tsv           Managed paths and Stow sources
+nvim/ wezterm/ tmux/ zsh/
+  Stow packages
+docs/
+  VitePress documentation
+tests/
+  CLI, install, restore, uninstall, and documentation checks
+install.sh              Remote installation entry point
 ```
 
 ## Contributing
 
-This is an open source project. You can fork it, adapt it, and propose changes
-with pull requests.
-
-Before publishing changes:
+Fork the repository, create a focused branch, update behavior and docs together,
+and run:
 
 ```sh
-bin/dotfiles-doctor
-bin/dotfiles-check
-npm run docs:build
-git status --short
+npm ci
+npm run check
 ```
 
-Do not commit credentials, tokens, local state, caches, logs, generated
-dependency folders, or machine-specific private files.
+To scaffold a new application package:
+
+```sh
+bbldr dotfiles scaffold app <name>
+```
+
+Do not commit credentials, tokens, histories, caches, generated state, or
+machine-specific private configuration. Use `~/.zshrc.local` for local-only
+shell values.

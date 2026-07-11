@@ -1,84 +1,110 @@
-# Backups And Restore
+# Backups, Restore, And Uninstall
 
-The project can return your configuration to its pre-install state without
-uninstalling applications. Bootstrap records every target before Stow creates
-links, and the restore command uses that record to avoid deleting unrelated
-files.
+The installer records each target before GNU Stow creates links. Restore uses
+that record to recover the pre-install state without deleting unrelated files.
 
-## Quick Restore
-
-Restore all packages from the latest completed installation:
+## List Restore Points
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest
+bbldr dotfiles backups
 ```
 
-Review the summary and confirm with `y`. For a non-interactive terminal:
+Example:
 
-```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest --yes
+```text
+ID                     STATUS        LATEST   PACKAGES
+20260711-154500        complete      yes      nvim,wezterm,tmux,zsh
+20260711-160200        rolled-back            zsh
 ```
 
-::: warning What is not removed
-Restore does not uninstall Homebrew, APT packages, Neovim, WezTerm, fonts, Oh
-My Zsh, or plugins. It only restores configuration targets managed by Stow.
-:::
+Each record contains:
 
-## Restore Selected Packages
-
-```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest tmux
-~/.config/dotfiles/bin/dotfiles-restore --backup latest nvim wezterm
+```text
+~/.config/bbldr/backups/dotfiles/<id>/manifest.tsv
+~/.config/bbldr/backups/dotfiles/<id>/status
 ```
 
-Restore a specific installation rather than the latest one:
+`latest` identifies the most recent successful run that actually changed a
+configuration target. An idempotent reinstall does not replace it.
 
-```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup 20260711-154500 --yes
-```
+## Manifest States
 
-## Find Installation Records
-
-```sh
-ls -la ~/.config/dotfiles-backups
-cat ~/.config/dotfiles-backups/latest
-cat ~/.config/dotfiles-backups/<timestamp>/status
-column -t -s $'\t' ~/.config/dotfiles-backups/<timestamp>/manifest.tsv
-```
-
-Manifest states mean:
-
-| State | Before installation | Restore behavior |
+| State | State before install | Restore action |
 | --- | --- | --- |
-| `absent` | No target existed. | Remove only the link installed by dotfiles. |
-| `moved` | User config was moved into the backup. | Remove the managed link and copy the old config back. |
-| `managed` | Target already pointed to this repo. | Keep it unchanged. |
+| `absent` | The target did not exist. | Remove only links created by this project. |
+| `moved` | A user file or directory existed. | Remove managed links and copy the backup back. |
+| `managed` | The target already pointed to this repo. | Keep it unchanged. |
+
+## Restore
+
+Restore every package from the latest useful record:
+
+```sh
+bbldr dotfiles restore --backup latest
+```
+
+Restore selected packages or an exact record:
+
+```sh
+bbldr dotfiles restore --backup latest tmux
+bbldr dotfiles restore --backup 20260711-154500 nvim zsh
+```
+
+For automation:
+
+```sh
+bbldr dotfiles restore --backup latest --yes
+```
+
+## Uninstall Configuration
+
+Return all registered packages to their original state:
+
+```sh
+bbldr dotfiles uninstall
+```
+
+Or uninstall selected packages:
+
+```sh
+bbldr dotfiles uninstall tmux zsh
+```
+
+Uninstall searches backwards for each package's original `absent` or `moved`
+record. It deliberately retains:
+
+```text
+installed applications and package managers
+~/.config/dotfiles
+~/.local/bin/bbldr
+backup records
+Oh My Zsh, plugins, and fonts
+```
+
+This makes it possible to inspect the result, recover manually, or reinstall.
 
 ## Protection Against Data Loss
 
-Before changing anything, restore verifies every selected target. It proceeds
-only when a path is absent or is still a symlink owned by the recorded repo.
-
-If you replaced a symlink with a new file after installation, restore stops:
+Before restoring, the command checks that each path is absent or still points
+to the recorded repository source. If a link was replaced by a local file,
+restore stops:
 
 ```text
-refusing to overwrite a modified path: /home/user/.zshrc
-Move it elsewhere, then run the restore command again.
+Refusing to overwrite a modified path: /home/user/.zshrc
 ```
 
-Preserve that file and retry:
+Move the new file aside and retry:
 
 ```sh
 mv ~/.zshrc ~/.zshrc.after-dotfiles
-~/.config/dotfiles/bin/dotfiles-restore --backup latest zsh
+bbldr dotfiles restore --backup latest zsh
 ```
 
-The original backup remains in the timestamped folder after restoration.
+The backup remains available after a successful restore.
 
 ## Recover A Broken Shell
 
-If Zsh reports an error before showing a prompt, start it without loading
-configuration:
+Start Zsh without loading configuration:
 
 ```sh
 /bin/zsh -f
@@ -87,57 +113,21 @@ configuration:
 Then restore only Zsh:
 
 ```sh
-~/.config/dotfiles/bin/dotfiles-restore --backup latest --yes zsh
+~/.local/bin/bbldr dotfiles restore --backup latest --yes zsh
 exec /bin/zsh
 ```
 
-If the dotfiles repo uses a custom path, replace `~/.config/dotfiles` with that
-path.
+Using the absolute `bbldr` path works even when the normal shell `PATH` failed
+to load.
 
 ## Failed Installation
 
-If Stow simulation or linking fails after files were moved, bootstrap runs an
-automatic rollback and writes:
-
-```text
-rolled-back
-```
-
-to the installation record's `status` file. Check it with:
+When Stow fails after configuration has been moved, installation performs an
+automatic rollback and writes `rolled-back` to the record. Inspect it with:
 
 ```sh
-find ~/.config/dotfiles-backups -name status -maxdepth 2 -print -exec cat {} \;
+bbldr dotfiles backups
 ```
 
-Do not manually delete the backup. Run the doctor, resolve the reported
-dependency or conflict, and start the installer again.
-
-## Legacy Backups
-
-Backups made by older versions may not contain `manifest.tsv`. Inspect those
-folders manually:
-
-```sh
-find ~/.config/dotfiles-backups/<timestamp> -maxdepth 6 -print
-```
-
-First unlink the relevant package with Stow:
-
-```sh
-cd ~/.config/dotfiles
-stow --no-folding --target="$HOME" --delete nvim
-```
-
-Only then move the old configuration back. Do not use `rm -rf` on
-`~/.config/nvim` or `~/.config/wezterm`; they may contain files created after
-installation.
-
-## Reinstall Later
-
-```sh
-cd ~/.config/dotfiles
-bin/dotfiles-install nvim
-```
-
-This relinks configuration only. It does not install dependencies or create a
-new backup manifest; use bootstrap when you need the complete safe workflow.
+Resolve the reported dependency or conflict and run the installer again. Do
+not delete the timestamped backup while diagnosing the failure.
