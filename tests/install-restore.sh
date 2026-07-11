@@ -75,6 +75,7 @@ home_rollback="$tmp_root/home-rollback"
 fake_bin="$tmp_root/fake-bin"
 mkdir -p "$home_rollback" "$fake_bin"
 printf 'original zsh\n' > "$home_rollback/.zshrc"
+# shellcheck disable=SC2016 # The generated fake Stow script must receive literal "$@".
 printf '%s\n' '#!/usr/bin/env bash' 'for argument in "$@"; do' '  if [ "$argument" = --simulate ]; then exit 0; fi' 'done' 'exit 1' > "$fake_bin/stow"
 chmod +x "$fake_bin/stow"
 if env HOME="$home_rollback" DOTFILES_DIR="$tmp_root/clone-rollback" DOTFILES_BACKUP_DIR="$home_rollback/backups" DOTFILES_REPO_URL="$fixture_repo" PATH="$fake_bin:$PATH" bash "$fixture_repo/bin/bootstrap" zsh; then
