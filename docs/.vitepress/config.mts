@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'dotfiles',
   description: 'My personal workspace for terminal setup, workflow, and documentation.',
   cleanUrls: true,
+  appearance: false,
   themeConfig: {
     siteTitle: 'dotfiles',
     nav: [
