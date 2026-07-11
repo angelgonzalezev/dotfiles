@@ -11,8 +11,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - name: Test install and restore on Debian 12
         if: runner.os == 'Linux'
-        run: docker run --rm -v "$PWD:/work" -w /work debian:12-slim bash -c "apt-get update && apt-get install -y git stow tar && tests/install-restore.sh"
+        run: docker run --rm -v "$PWD:/work" -w /work debian:12-slim bash -c "apt-get update && apt-get install -y curl git stow tar && tests/install-restore.sh"
       - run: bin/dotfiles-check
         env:
           DOTFILES_SKIP_DOCS: ${{ matrix.os == 'macos-latest' && '1' || '0' }}
