@@ -36,26 +36,25 @@ installed with scripts, and is documented in one place.
 
 ## Install
 
-Install the default configuration packages from any terminal:
+Run the interactive installer from any terminal:
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+```
+
+The installer can ask before installing CLI tools, WezTerm, Oh My Zsh,
+`zsh-autosuggestions`, and the selected dotfiles packages.
+
+Install the default configuration packages without interactive prompts:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash
 ```
 
-Run the interactive installer from a local clone:
-
-```sh
-git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
-~/.config/dotfiles/bin/bootstrap
-```
-
-The interactive installer can ask before installing CLI tools, WezTerm, Oh My
-Zsh, `zsh-autosuggestions`, and the selected dotfiles packages.
-
 Run every install step without prompts:
 
 ```sh
-DOTFILES_ASSUME_YES=1 ~/.config/dotfiles/bin/bootstrap
+DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 To install only one package:
@@ -123,11 +122,13 @@ bin/
   dotfiles-sync
 ```
 
-## Manual Install
+## Relink After Installation
+
+After bootstrap runs once, the repo exists at `~/.config/dotfiles`. From there,
+you can relink config files without downloading the installer again.
 
 ```sh
 brew install stow
-git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
 bin/dotfiles-install
 ```

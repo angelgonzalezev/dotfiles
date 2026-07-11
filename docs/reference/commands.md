@@ -17,10 +17,10 @@ curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/b
 This mode links dotfiles packages and installs `stow` if needed. It does not ask
 interactive questions because the script is streamed through standard input.
 
-Interactive local run:
+Interactive remote run:
 
 ```sh
-~/.config/dotfiles/bin/bootstrap
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 This mode can ask before installing CLI tools, WezTerm, Oh My Zsh,
@@ -29,13 +29,13 @@ This mode can ask before installing CLI tools, WezTerm, Oh My Zsh,
 Non-interactive run that accepts every install step:
 
 ```sh
-DOTFILES_ASSUME_YES=1 ~/.config/dotfiles/bin/bootstrap
+DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 Install selected packages only:
 
 ```sh
-~/.config/dotfiles/bin/bootstrap nvim tmux zsh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- nvim tmux zsh
 ```
 
 Useful environment variables:

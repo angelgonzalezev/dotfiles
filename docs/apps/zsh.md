@@ -86,7 +86,7 @@ The interactive bootstrap can also install Oh My Zsh and
 `zsh-autosuggestions` for you:
 
 ```sh
-~/.config/dotfiles/bin/bootstrap zsh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- zsh
 ```
 
 Before installing this package on a machine that already has a large `.zshrc`,

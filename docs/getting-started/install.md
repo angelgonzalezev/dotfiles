@@ -23,17 +23,16 @@ exists locally and you only want to relink configuration files.
 
 ## Recommended Path
 
-For a new user, the clearest path is:
+For a new user, the clearest path is a single remote command:
 
-1. Clone the repo.
-2. Run the interactive bootstrap.
-3. Answer each install question.
+1. Run the interactive install command.
+2. Answer each install question.
+3. Let the bootstrap clone the repo into `~/.config/dotfiles`.
 4. Open a new terminal.
 5. Check the installed commands.
 
 ```sh
-git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
-~/.config/dotfiles/bin/bootstrap
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 The installer will ask:
@@ -69,12 +68,23 @@ questions also need standard input. To avoid confusing behavior, the installer
 only asks questions when it is run from a local file in a normal terminal.
 :::
 
+## Why Interactive Install Uses `bash -c`
+
+The interactive command uses this shape:
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
+```
+
+This downloads the script first and passes it to Bash as a command string. That
+leaves standard input available for prompts, so the installer can ask questions.
+
 ## Automatic Install
 
 Run every install step without prompts:
 
 ```sh
-DOTFILES_ASSUME_YES=1 ~/.config/dotfiles/bin/bootstrap
+DOTFILES_ASSUME_YES=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 This mode can install:
@@ -119,10 +129,10 @@ Install only Zsh:
 curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap | bash -s -- zsh
 ```
 
-From a local clone:
+Run selected packages remotely with interactive prompts:
 
 ```sh
-~/.config/dotfiles/bin/bootstrap nvim tmux zsh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)" -- nvim tmux zsh
 ```
 
 ## What Gets Linked
@@ -201,7 +211,7 @@ The tracked `.zshrc` loads `~/.zshrc.local` automatically.
 Example:
 
 ```sh
-DOTFILES_DIR="$HOME/dev/dotfiles" ~/.config/dotfiles/bin/bootstrap
+DOTFILES_DIR="$HOME/dev/dotfiles" bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/bin/bootstrap)"
 ```
 
 ## Verify The Install
@@ -222,14 +232,15 @@ cd ~/.config/dotfiles
 bin/dotfiles-doctor
 ```
 
-## Manual Install
+## Relink After Installation
 
-Manual install only links config files. It does not install apps or optional
-dependencies.
+After bootstrap runs once, the repo exists at `~/.config/dotfiles`. From that
+point, you can relink config files without downloading the installer again.
+
+This only links config files. It does not install apps or optional dependencies.
 
 ```sh
 brew install stow
-git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
 bin/dotfiles-install
 ```
