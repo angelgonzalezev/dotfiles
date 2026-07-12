@@ -42,6 +42,11 @@ Pull the latest changes and run diagnostics:
 bbldr dotfiles update
 ```
 
+The command updates only packages that are already linked. If an update adds a
+new configuration file to one of those packages, `update` creates the missing
+link; when a tracked file is removed, its obsolete project link is removed. It
+does not enable unrelated packages or move neighboring local files.
+
 Update refuses to run when local files have uncommitted changes. Commit or
 stash them first.
 
@@ -96,6 +101,7 @@ Run:
 
 ```sh
 bbldr dotfiles doctor
+bbldr dotfiles packages
 bbldr dotfiles check
 git status --short
 ```

@@ -10,7 +10,7 @@ Read `../../../AGENTS.md`, `../../../CONTRIBUTING.md`, and
 
 1. Inspect surrounding implementation and preserve unrelated changes.
 2. Protect dry-run, backups, rollback, restore, and command collision behavior.
-3. Update tests, help, and documentation with public behavior.
+3. Update tests, safe `--help`, option validation, and documentation with public behavior.
 4. Run focused tests followed by `bin/bbldr-dotfiles check`.
-5. Review the diff for secrets, private paths, and unrelated churn.
+5. Review the diff for secrets, private paths, unlicensed assets, and unrelated churn.
 6. Summarize the problem, changes, safety impact, and verification for the PR.

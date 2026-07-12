@@ -11,7 +11,7 @@ experience with readable font settings, tabs, custom colors, and fast keyboard
 navigation.
 :::
 
-![WezTerm terminal preview](/images/apps/wezterm-overview.svg)
+![WezTerm logo](/images/logos/wezterm-logo.svg)
 
 Configuration file:
 

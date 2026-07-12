@@ -1,0 +1,13 @@
+{
+  "globs": [
+    "**/*.md",
+    "!node_modules/**",
+    "!docs/.vitepress/cache/**",
+    "!docs/.vitepress/dist/**"
+  ],
+  "config": {
+    "MD013": false,
+    "MD033": false,
+    "MD041": false
+  }
+}

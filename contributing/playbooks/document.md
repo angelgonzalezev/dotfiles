@@ -10,3 +10,5 @@
 6. Link official upstream documentation and avoid unsupported claims.
 7. Update navigation or registry metadata when adding pages.
 8. Run documentation link checks and the production VitePress build.
+9. Update third-party notices when adding fonts, logos, screenshots, or media
+   that were not created entirely for this repository.

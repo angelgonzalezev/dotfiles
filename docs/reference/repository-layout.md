@@ -18,6 +18,7 @@
 |-- zsh/                        Zsh Stow package
 |-- tests/                      CLI and installation regression tests
 |-- install.sh                  Remote installation entry point
+|-- VERSION                     Dotfiles module version
 |-- AGENTS.md                   Shared agent instructions
 |-- CLAUDE.md                   Claude entry point
 |-- CONTRIBUTING.md             Human contribution workflow
@@ -57,3 +58,7 @@ Runtime files are outside the repository:
 
 Dependencies, caches, histories, sessions, credentials, and local overrides
 must not be added to a Stow package.
+
+Version 2 backup manifests contain one row per managed file. Restore validates
+that targets remain under `$HOME`, sources remain under the checkout, and backup
+items remain inside the selected timestamped record.

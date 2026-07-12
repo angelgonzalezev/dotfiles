@@ -6,5 +6,7 @@
 4. Update help and docs for every public behavior change.
 5. Run `npm run check`, `git diff --check`, and inspect `git diff`.
 6. Scan staged paths and content for secrets or local machine data.
-7. Write a PR summary with the problem, solution, safety implications, and
+7. Confirm every changed command has safe help, option validation, and recovery
+   coverage where it writes user state.
+8. Write a PR summary with the problem, solution, safety implications, and
    exact verification performed.

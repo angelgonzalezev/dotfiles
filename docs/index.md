@@ -21,6 +21,7 @@ hero:
 ```sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh)"
 ```
+
 </section>
 
 <section class="tech-stack" aria-labelledby="tech-stack-title">

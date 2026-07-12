@@ -22,6 +22,10 @@ A module must:
 3. Support `help` and return non-zero for unknown commands.
 4. Own its own versioning, state, and documentation.
 5. Never overwrite a dispatcher or module it does not recognize.
+6. Treat `--help` as read-only and reject unknown options.
 
 The dispatcher owns only `help`, `version`, and module discovery. It does not
 contain dotfiles-specific installation logic.
+
+The dotfiles module reads its version from the repository `VERSION` file. The
+dispatcher has an independent version so future modules can evolve separately.

@@ -20,6 +20,12 @@ Two tab-separated files are the source of truth:
 Install, restore, uninstall, doctor, tests, and the documentation sidebar read
 these files. Adding a package should not require editing command-specific lists.
 
+```sh
+bbldr dotfiles packages
+```
+
+This lists registry metadata and whether each package is currently linked.
+
 ## Scaffold An Application
 
 ```sh
@@ -34,6 +40,8 @@ myapp/.config/myapp -> ~/.config/myapp
 
 It also adds registry entries and `docs/apps/myapp.md`. The source directory is
 intentionally empty: add the application's real configuration before testing.
+Scaffold validates both registries and refuses to overwrite an existing package
+directory or documentation page.
 
 Then complete these areas:
 
@@ -59,8 +67,9 @@ bbldr dotfiles uninstall nvim
 ```
 
 Use install rather than raw `stow` because it creates a restore manifest and
-backs up conflicts. Use uninstall rather than `stow --delete` because it knows
-how to recover the previous configuration.
+backs up exact conflicting files while preserving neighboring local files. Use
+uninstall rather than `stow --delete` because it knows how to recover the
+previous configuration and remove links introduced by later updates.
 
 ## Keep Local Values Private
 

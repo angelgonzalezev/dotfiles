@@ -14,10 +14,32 @@ const appItems = readFileSync(resolve(repoRoot, 'config/packages.tsv'), 'utf8')
   })
 
 export default defineConfig({
+  lang: 'en-US',
   title: 'dotfiles',
-  description: 'My personal workspace for terminal setup, workflow, and documentation.',
+  description: 'An open source terminal workspace designed to make development faster, cleaner, and easier to maintain.',
   cleanUrls: true,
   appearance: false,
+  sitemap: {
+    hostname: 'https://dotfiles.becomebuilder.com'
+  },
+  head: [
+    ['meta', { name: 'theme-color', content: '#050505' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'dotfiles' }],
+    ['meta', { property: 'og:image', content: 'https://dotfiles.becomebuilder.com/images/apps/nvim-screenshot.png' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['link', { rel: 'icon', href: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">👼</text></svg>' }]
+  ],
+  transformHead({ pageData }) {
+    const pagePath = pageData.relativePath.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+    const canonical = `https://dotfiles.becomebuilder.com/${pagePath}`
+    return [
+      ['link', { rel: 'canonical', href: canonical }],
+      ['meta', { property: 'og:url', content: canonical }],
+      ['meta', { property: 'og:title', content: pageData.title || 'dotfiles' }],
+      ['meta', { property: 'og:description', content: pageData.description || 'An open source terminal workspace for faster development.' }]
+    ]
+  },
   lastUpdated: true,
   themeConfig: {
     siteTitle: 'dotfiles',
@@ -40,6 +62,7 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/getting-started/overview' },
           { text: 'Install', link: '/getting-started/install' },
+          { text: 'Compatibility', link: '/getting-started/compatibility' },
           { text: 'Daily Workflow', link: '/getting-started/daily-workflow' },
           { text: 'FAQ', link: '/getting-started/faq' }
         ]
@@ -64,6 +87,7 @@ export default defineConfig({
           { text: 'Repository Layout', link: '/reference/repository-layout' },
           { text: 'bbldr Architecture', link: '/reference/bbldr-architecture' },
           { text: 'Commands', link: '/reference/commands' },
+          { text: 'Licensing And Assets', link: '/reference/licensing' },
           { text: 'Contributing', link: '/reference/contributing' }
         ]
       }

@@ -8,7 +8,11 @@ tmux, and Zsh on macOS and Ubuntu/Debian. GNU Stow links the tracked files into
 the user's home directory without copying them.
 
 Created by [Angel Gonzalez](https://www.youtube.com/@byangelgonzalez) and
-licensed under the [MIT License](LICENSE).
+licensed under the [MIT License](LICENSE). Bundled fonts and project logos are
+covered by [third-party notices](THIRD_PARTY_NOTICES.md).
+
+Read the published documentation at
+[dotfiles.becomebuilder.com](https://dotfiles.becomebuilder.com/).
 
 ## What It Solves
 
@@ -18,7 +22,7 @@ licensed under the [MIT License](LICENSE).
 | Existing configuration could be lost. | Conflicts are backed up before links are created. |
 | Terminal commands are easy to forget. | The documentation records the actual shortcuts and workflows. |
 | Config drifts between computers. | Shared files remain versioned in Git and linked with Stow. |
-| Recovery is unclear. | Every installation produces a manifest that supports safe restore and uninstall. |
+| Recovery is unclear. | Every installation records each managed file for safe restore, uninstall, and purge. |
 | Contributors repeat manual steps. | A package registry, scaffold command, tests, and agent skills define the workflow. |
 
 ## Install
@@ -42,6 +46,7 @@ After installation, the workspace can be managed from any directory:
 
 ```sh
 bbldr dotfiles status
+bbldr dotfiles packages
 bbldr dotfiles doctor
 bbldr dotfiles update
 bbldr dotfiles backups
@@ -53,6 +58,15 @@ Existing configuration is stored under:
 ```text
 ~/.config/bbldr/backups/dotfiles/
 ```
+
+To restore configuration and remove the repository and managed CLI commands:
+
+```sh
+bbldr dotfiles purge
+```
+
+Applications, package managers, fonts, Oh My Zsh, and backups are deliberately
+retained. See the [complete recovery guide](docs/guides/backups-and-restore.md).
 
 Read the [complete installation guide](docs/getting-started/install.md) before
 using automatic mode on a machine with an existing terminal setup.
@@ -112,6 +126,7 @@ docs/
 tests/
   CLI, install, restore, uninstall, and documentation checks
 install.sh              Remote installation entry point
+VERSION                 Dotfiles module version
 ```
 
 ## Contributing

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 script_path="${BASH_SOURCE[0]}"
 while [ -L "$script_path" ]; do
@@ -12,7 +12,7 @@ packages_file="$repo_root/config/packages.tsv"
 targets_file="$repo_root/config/targets.tsv"
 backup_root="${BBLDR_DOTFILES_BACKUP_DIR:-$HOME/.config/bbldr/backups/dotfiles}"
 assume_yes="${BBLDR_ASSUME_YES:-0}"
-version="0.1.0"
+version="$(tr -d '[:space:]' < "$repo_root/VERSION")"
 
 usage() {
   cat <<'EOF'
@@ -23,9 +23,11 @@ Commands:
   update                     Fast-forward the repository and diagnose it
   status                     Show repository and managed-path status
   doctor                     Diagnose dependencies, links, and repository state
+  packages                   List packages, dependencies, and installation state
   backups                    List installation records
   restore [PACKAGE...]       Restore configuration from a backup
   uninstall [PACKAGE...]     Restore pre-install configuration safely
+  purge                      Restore configuration and remove the project CLI
   scaffold app NAME          Create a contributor package scaffold
   check                      Run the contributor validation suite
   version                    Print module version
@@ -125,6 +127,20 @@ targets_for_package() {
   done < "$targets_file"
 }
 
+items_for_package() {
+  local wanted="$1" target source source_file relative
+  while IFS=$'\t' read -r target source; do
+    if [ -d "$source" ]; then
+      while IFS= read -r source_file; do
+        relative="${source_file#"$source"/}"
+        printf '%s\t%s\n' "$target/$relative" "$source_file"
+      done < <(find "$source" \( -type f -o -type l \) -print | sort)
+    else
+      printf '%s\t%s\n' "$target" "$source"
+    fi
+  done < <(targets_for_package "$wanted")
+}
+
 resolve_link() {
   local path="$1" link
   link="$(readlink "$path")"
@@ -150,14 +166,77 @@ target_is_managed() {
 }
 
 target_state() {
-  local target="$1" source="$2"
-  if [ ! -e "$target" ] && [ ! -L "$target" ]; then
-    printf 'new\n'
-  elif target_is_managed "$target" "$source"; then
-    printf 'managed\n'
-  else
-    printf 'backup required\n'
+  local target="$1" source="$2" item_target item_source state new=0 managed=0 conflicts=0
+  if [ -d "$source" ]; then
+    while IFS=$'\t' read -r item_target item_source; do
+      state="$(target_state "$item_target" "$item_source")"
+      case "$state" in new) new=$((new + 1)) ;; managed) managed=$((managed + 1)) ;; *) conflicts=$((conflicts + 1)) ;; esac
+    done < <(items_for_source "$target" "$source")
+    if [ "$conflicts" -gt 0 ]; then printf 'backup required\n'
+    elif [ "$new" -gt 0 ] && [ "$managed" -gt 0 ]; then printf 'partial\n'
+    elif [ "$managed" -gt 0 ]; then printf 'managed\n'
+    else printf 'new\n'
+    fi
+  elif [ ! -e "$target" ] && [ ! -L "$target" ]; then printf 'new\n'
+  elif target_is_managed "$target" "$source"; then printf 'managed\n'
+  else printf 'backup required\n'
   fi
+}
+
+items_for_source() {
+  local target="$1" source="$2" source_file relative
+  while IFS= read -r source_file; do
+    relative="${source_file#"$source"/}"
+    printf '%s\t%s\n' "$target/$relative" "$source_file"
+  done < <(find "$source" \( -type f -o -type l \) -print | sort)
+}
+
+package_is_installed() {
+  local target source
+  while IFS=$'\t' read -r target source; do
+    link_matches "$target" "$source" && return 0
+  done < <(items_for_package "$1")
+  return 1
+}
+
+installed_packages() {
+  local package
+  while IFS= read -r package; do package_is_installed "$package" && printf '%s\n' "$package"; done < <(all_packages)
+}
+
+canonical_future_path() {
+  local path="$1" suffix="" name
+  while [ ! -e "$path" ] && [ ! -L "$path" ] && [ "$path" != / ]; do
+    name="${path##*/}"
+    suffix="/$name$suffix"
+    path="$(dirname "$path")"
+  done
+  printf '%s%s\n' "$(realpath "$path")" "$suffix"
+}
+
+canonical_target_path() {
+  printf '%s/%s\n' "$(canonical_future_path "$(dirname "$1")")" "${1##*/}"
+}
+
+validate_runtime_paths() {
+  local package target _source canonical_backup canonical_home canonical_repo canonical_target
+  case "$backup_root" in /*) ;; *) die "Backup directory must be absolute: $backup_root" ;; esac
+  [ "$backup_root" != / ] && [ "$backup_root" != "$HOME" ] || die "Unsafe backup directory: $backup_root"
+  canonical_backup="$(canonical_future_path "$backup_root")"
+  canonical_home="$(canonical_future_path "$HOME")"
+  canonical_repo="$(canonical_future_path "$repo_root")"
+  case "$canonical_backup/" in "$canonical_repo/"*) die "Backup directory overlaps the repository: $backup_root" ;; esac
+  case "$canonical_repo/" in "$canonical_backup/"*) die "Backup directory contains the repository: $backup_root" ;; esac
+  while IFS= read -r package; do
+    while IFS=$'\t' read -r target _source; do
+      if [ -d "$_source" ]; then canonical_target="$(canonical_future_path "$target")"
+      else canonical_target="$(canonical_target_path "$target")"
+      fi
+      case "$canonical_target/" in "$canonical_home/"*) ;; *) die "Managed target resolves outside HOME: $target" ;; esac
+      case "$canonical_backup/" in "$canonical_target/"*) die "Backup directory overlaps a managed target: $target" ;; esac
+      case "$canonical_target/" in "$canonical_backup/"*) die "Backup directory contains a managed target: $target" ;; esac
+    done < <(targets_for_package "$package")
+  done < <(all_packages)
 }
 
 activate_homebrew() {
@@ -387,6 +466,7 @@ create_manifest() {
   run_dir="$backup_root/$run_id"
   manifest="$run_dir/manifest.tsv"
   mkdir -p "$run_dir"
+  printf '2\n' > "$run_dir/manifest-version"
   printf 'state\tpackage\ttarget\tsource\tbackup\n' > "$manifest"
   printf 'running\n' > "$run_dir/status"
 }
@@ -408,10 +488,12 @@ backup_existing_targets() {
         changed_targets=1
         mkdir -p "$(dirname "$backup")"
         log "Backing up $target to $backup"
+        printf '%s\t%s\t%s\t%s\t%s\n' "$state" "$package" "$target" "$source" "$backup" >> "$manifest"
         mv "$target" "$backup"
+        continue
       fi
       printf '%s\t%s\t%s\t%s\t%s\n' "$state" "$package" "$target" "$source" "$backup" >> "$manifest"
-    done < <(targets_for_package "$package")
+    done < <(items_for_package "$package")
   done
 }
 
@@ -447,9 +529,25 @@ rollback_install() {
   printf 'rolled-back\n' > "$run_dir/status"
 }
 
+install_failure() {
+  local exit_code="${1:-1}"
+  trap - ERR INT TERM
+  if [ -n "$manifest" ] && [ -f "$manifest" ] && [ "$(cat "$run_dir/status" 2>/dev/null || true)" = running ]; then
+    rollback_install || true
+  fi
+  exit "$exit_code"
+}
+
 link_packages() {
-  if ! stow --simulate --no-folding --target="$HOME" --dir="$repo_root" "$@"; then rollback_install; return 1; fi
-  if ! stow --no-folding --target="$HOME" --dir="$repo_root" "$@"; then rollback_install; return 1; fi
+  local simulation_output
+  simulation_output="$(mktemp)"
+  if ! stow --simulate --no-folding --target="$HOME" --dir="$repo_root" "$@" >"$simulation_output" 2>&1; then
+    cat "$simulation_output" >&2
+    rm -f "$simulation_output"
+    return 1
+  fi
+  rm -f "$simulation_output"
+  stow --no-folding --target="$HOME" --dir="$repo_root" "$@"
 }
 
 command_install() {
@@ -474,10 +572,12 @@ EOF
       *) packages+=("$1"); shift ;;
     esac
   done
+  validate_registry
   if [ "${#packages[@]}" -eq 0 ]; then
     while IFS= read -r package; do packages+=("$package"); done < <(default_packages)
   fi
   validate_packages "${packages[@]}"
+  validate_runtime_paths
   require_command git
   require_command curl
   check_cli_collisions
@@ -516,10 +616,13 @@ EOF
   if [ "$install_configs" != 1 ]; then log "Installed bbldr without dotfiles configuration links."; return; fi
   install_stow
   create_manifest
+  trap 'install_failure $?' ERR
+  trap 'install_failure 130' INT TERM
   backup_existing_targets "${packages[@]}"
   log "Installing packages: ${packages[*]}"
   link_packages "${packages[@]}"
   printf 'complete\n' > "$run_dir/status"
+  trap - ERR INT TERM
   if [ "$changed_targets" = 1 ] || [ ! -f "$backup_root/latest" ]; then printf '%s\n' "$run_id" > "$backup_root/latest"; fi
   restore_id="$(cat "$backup_root/latest")"
   log "Installation record: $run_dir"
@@ -554,8 +657,37 @@ restore_target_is_safe() {
 
 restore_remove_links() { remove_source_links "$1" "$2"; }
 
+valid_backup_id() {
+  [[ "$1" =~ ^[0-9]{8}-[0-9]{6}(-[0-9]+)?$ ]]
+}
+
+validate_manifest_row() {
+  local package="$1" target="$2" source="$3" backup="$4" record_dir="$5"
+  package_exists "$package" || die "Manifest contains an unknown package: $package"
+  case "/$target/$source/$backup/" in */../*) die "Manifest contains parent-directory traversal" ;; esac
+  case "$target" in "$HOME"/*) ;; *) die "Manifest target is outside HOME: $target" ;; esac
+  case "$source" in "$repo_root"/*) ;; *) die "Manifest source is outside the repository: $source" ;; esac
+  case "$backup" in "$record_dir"/*) ;; *) die "Manifest backup is outside its record: $backup" ;; esac
+  manifest_row_is_registered "$package" "$target" "$source" || die "Manifest row is not registered for $package: $target"
+}
+
+manifest_row_is_registered() {
+  local wanted="$1" row_target="$2" row_source="$3" target source relative
+  while IFS=$'\t' read -r target source; do
+    if [ "$row_target" = "$target" ] && [ "$row_source" = "$source" ]; then return 0; fi
+    [ -d "$source" ] || continue
+    case "$row_source" in
+      "$source"/*)
+        relative="${row_source#"$source"/}"
+        [ "$row_target" = "$target/$relative" ] && return 0
+        ;;
+    esac
+  done < <(targets_for_package "$wanted")
+  return 1
+}
+
 command_restore() {
-  local backup_id=latest restore_yes=0 run_dir manifest row state package target source backup reply
+  local backup_id=latest restore_yes=0 run_dir manifest row state package target source backup reply staging
   local -a selected_packages=() rows=()
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -573,17 +705,23 @@ EOF
       *) selected_packages+=("$1"); shift ;;
     esac
   done
+  validate_registry
   [ "${#selected_packages[@]}" -eq 0 ] || validate_packages "${selected_packages[@]}"
+  validate_runtime_paths
   if [ "$backup_id" = latest ]; then
     [ -f "$backup_root/latest" ] || die "No completed installation record found in $backup_root"
     backup_id="$(cat "$backup_root/latest")"
   fi
+  valid_backup_id "$backup_id" || die "Invalid backup id: $backup_id"
   run_dir="$backup_root/$backup_id"
   manifest="$run_dir/manifest.tsv"
   [ -f "$manifest" ] || die "Manifest not found: $manifest"
+  [ "$(cat "$run_dir/status" 2>/dev/null || true)" = complete ] || die "Backup record is not complete: $backup_id"
 
   while IFS=$'\t' read -r state package target source backup; do
     [ "$state" = state ] && continue
+    case "$state" in absent|moved|managed) ;; *) die "Unknown manifest state: $state" ;; esac
+    validate_manifest_row "$package" "$target" "$source" "$backup" "$run_dir"
     if [ "${#selected_packages[@]}" -gt 0 ]; then
       local selected=0 wanted
       for wanted in "${selected_packages[@]}"; do [ "$wanted" = "$package" ] && selected=1; done
@@ -612,9 +750,15 @@ EOF
     case "$state" in
       absent) restore_remove_links "$target" "$source" ;;
       moved)
+        staging="$target.bbldr-restore-$$"
+        [ ! -e "$staging" ] && [ ! -L "$staging" ] || die "Restore staging path already exists: $staging"
+        mkdir -p "$(dirname "$staging")"
+        cp -a "$backup" "$staging"
         restore_remove_links "$target" "$source"
-        mkdir -p "$(dirname "$target")"
-        cp -a "$backup" "$target"
+        if ! mv "$staging" "$target"; then
+          log "Restore copy remains at $staging" >&2
+          return 1
+        fi
         ;;
       managed) log "Kept previously managed target: $target" ;;
     esac
@@ -633,12 +777,12 @@ find_original_record() {
       printf '%s\n' "$record"
       return 0
     fi
-  done < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort -r)
+  done < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort)
   return 1
 }
 
 command_uninstall() {
-  local uninstall_yes=0 package record
+  local uninstall_yes=0 package record target source
   local -a packages=()
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -656,6 +800,7 @@ EOF
       *) packages+=("$1"); shift ;;
     esac
   done
+  validate_registry
   if [ "${#packages[@]}" -eq 0 ]; then
     while IFS= read -r package; do packages+=("$package"); done < <(all_packages)
   fi
@@ -665,6 +810,7 @@ EOF
   for package in "${packages[@]}"; do
     if record="$(find_original_record "$package")"; then
       command_restore --backup "$record" --yes "$package"
+      while IFS=$'\t' read -r target source; do remove_source_links "$target" "$source"; done < <(items_for_package "$package")
     else
       log "No original installation record found for $package; leaving it unchanged."
     fi
@@ -674,6 +820,8 @@ EOF
 
 command_backups() {
   local directory id status packages marker
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles backups\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown backups option: $1"
   [ -d "$backup_root" ] || { log "No backups found in $backup_root"; return; }
   printf '%-22s %-13s %-8s %s\n' ID STATUS LATEST PACKAGES
   for directory in "$backup_root"/*; do
@@ -689,6 +837,9 @@ command_backups() {
 
 command_status() {
   local package target source
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles status\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown status option: $1"
+  validate_registry
   printf 'Repository: %s\n' "$repo_root"
   git -C "$repo_root" status --short --branch
   printf '\nManaged paths:\n'
@@ -699,22 +850,58 @@ command_status() {
 }
 
 command_doctor() {
-  local failures=0 command_name package target source path sensitive_file
+  local failures=0 command_name package target source path sensitive_file check_all=0 state
+  local -a packages=() required_commands=(git curl)
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --all) check_all=1; shift ;;
+      --help|-h)
+        cat <<'EOF'
+Usage: bbldr dotfiles doctor [--all] [PACKAGE...]
+
+Diagnose installed packages by default, selected packages when supplied, or
+every registered package with --all.
+EOF
+        return
+        ;;
+      --*) die "Unknown doctor option: $1" ;;
+      *) packages+=("$1"); shift ;;
+    esac
+  done
+  validate_registry
+  if [ "$check_all" = 1 ] && [ "${#packages[@]}" -gt 0 ]; then die "--all cannot be combined with package names"; fi
+  if [ "$check_all" = 1 ]; then
+    packages=()
+    while IFS= read -r package; do packages+=("$package"); done < <(all_packages)
+  elif [ "${#packages[@]}" -eq 0 ]; then
+    while IFS= read -r package; do packages+=("$package"); done < <(installed_packages)
+  fi
+  [ "${#packages[@]}" -eq 0 ] || validate_packages "${packages[@]}"
+  [ "${#packages[@]}" -eq 0 ] || required_commands+=(stow)
+  for package in "${packages[@]}"; do
+    case "$package" in
+      nvim) required_commands+=(nvim rg) ;;
+      wezterm) required_commands+=(wezterm) ;;
+      tmux) required_commands+=(tmux tmux-dev tmux-agent tmux-status) ;;
+      zsh) required_commands+=(zsh) ;;
+    esac
+  done
   log "Repository: $repo_root"
+  printf 'Packages:'; if [ "${#packages[@]}" -eq 0 ]; then printf ' none'; else printf ' %s' "${packages[@]}"; fi; printf '\n'
   printf '\nRequired commands:\n'
-  for command_name in git curl stow nvim tmux rg zsh; do
+  while IFS= read -r command_name; do
     if command -v "$command_name" >/dev/null 2>&1; then log "  ok: $command_name ($(command -v "$command_name"))"; else log "  missing: $command_name"; failures=$((failures + 1)); fi
-  done
-  printf '\nOptional commands:\n'
-  for command_name in wezterm tmux-dev tmux-agent tmux-status; do
-    if command -v "$command_name" >/dev/null 2>&1; then log "  ok: $command_name"; else log "  not installed: $command_name"; fi
-  done
+  done < <(printf '%s\n' "${required_commands[@]}" | awk '!seen[$0]++')
   path="$HOME/.local/bin/bbldr"
   if [ -x "$path" ] && bbldr_is_managed; then log "  ok: bbldr"; else log "  missing or unrelated: $path"; failures=$((failures + 1)); fi
   printf '\nConfiguration targets:\n'
-  while IFS= read -r package; do
-    while IFS=$'\t' read -r target source; do log "  $package: $(target_state "$target" "$source") - $target"; done < <(targets_for_package "$package")
-  done < <(all_packages)
+  for package in "${packages[@]}"; do
+    while IFS=$'\t' read -r target source; do
+      state="$(target_state "$target" "$source")"
+      log "  $package: $state - $target"
+      [ "$state" = managed ] || failures=$((failures + 1))
+    done < <(targets_for_package "$package")
+  done
   printf '\nGit status:\n'
   git -C "$repo_root" status --short --branch
   printf '\nSensitive tracked filenames:\n'
@@ -731,21 +918,82 @@ command_doctor() {
 }
 
 command_update() {
+  local package target source link snapshot
+  local -a packages=()
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles update\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown update option: $1"
   [ -d "$repo_root/.git" ] || die "Not a Git repository: $repo_root"
   [ -z "$(git -C "$repo_root" status --porcelain)" ] || die "Update refused because the repository has local changes."
-  git -C "$repo_root" pull --ff-only
+  while IFS= read -r package; do packages+=("$package"); done < <(installed_packages)
+  snapshot="$(mktemp)"
+  for package in "${packages[@]}"; do
+    while IFS=$'\t' read -r target source; do
+      [ -L "$target" ] || continue
+      printf '%s\t%s\t%s\n' "$target" "$source" "$(readlink "$target")" >> "$snapshot"
+    done < <(items_for_package "$package")
+  done
+  if ! git -C "$repo_root" pull --ff-only; then rm -f "$snapshot"; return 1; fi
+  while IFS=$'\t' read -r target source link; do
+    if [ ! -e "$source" ] && [ -L "$target" ] && [ "$(readlink "$target")" = "$link" ]; then rm "$target"; fi
+  done < "$snapshot"
+  rm -f "$snapshot"
   install_cli_commands
-  command_doctor
+  if [ "${#packages[@]}" -gt 0 ]; then command_install --config-only --yes "${packages[@]}"; fi
+  command_doctor "${packages[@]}"
+}
+
+command_packages() {
+  local package default dependency docs _title _description state
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles packages\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown packages option: $1"
+  validate_registry
+  printf '%-10s %-9s %-16s %-16s %s\n' PACKAGE DEFAULT DEPENDENCIES STATE DOCS
+  while IFS=$'\t' read -r package default dependency docs _title _description; do
+    [ "$package" = package ] && continue
+    if package_is_installed "$package"; then state=installed; else state=not-installed; fi
+    printf '%-10s %-9s %-16s %-16s %s\n' "$package" "$default" "$dependency" "$state" "$docs"
+  done < "$packages_file"
+}
+
+validate_registry() {
+  local _package _target source canonical_repo canonical_source
+  awk -F '\t' '
+    NR == 1 { if ($0 != "package\tdefault\tdependency\tdocs\ttitle\tdescription") exit 1; next }
+    NF != 6 || $1 !~ /^[a-z0-9][a-z0-9-]*$/ || $2 !~ /^[01]$/ || $3 == "" || $4 !~ /^\// || $5 == "" || $6 == "" || seen[$1]++ { exit 1 }
+    {
+      count=split($3, dependencies, ",")
+      for (i=1; i<=count; i++) {
+        if (dependencies[i] !~ /^(cli|wezterm|shell|manual)$/ || dependency_seen[$1 SUBSEP dependencies[i]]++) exit 1
+      }
+    }
+  ' "$packages_file" || die "Invalid package registry: $packages_file"
+  awk -F '\t' '
+    NR == FNR { if (FNR > 1) packages[$1]=1; next }
+    FNR == 1 { if ($0 != "package\ttarget\tsource") exit 1; next }
+    NF != 3 || !packages[$1] || $2 == "" || $3 == "" || $2 ~ /^\// || $3 ~ /^\// || $2 ~ /(^|\/)\.\.(\/|$)/ || $3 ~ /(^|\/)\.\.(\/|$)/ || seen[$1 FS $2]++ || source_seen[$3]++ { exit 1 }
+  ' "$packages_file" "$targets_file" || die "Invalid target registry: $targets_file"
+  canonical_repo="$(canonical_future_path "$repo_root")"
+  while IFS=$'\t' read -r _package _target source; do
+    [ "$_package" = package ] && continue
+    [ -e "$repo_root/$source" ] || [ -L "$repo_root/$source" ] || die "Registry source does not exist: $source"
+    canonical_source="$(canonical_future_path "$repo_root/$source")"
+    case "$canonical_source/" in "$canonical_repo/"*) ;; *) die "Registry source resolves outside the repository: $source" ;; esac
+  done < "$targets_file"
 }
 
 command_scaffold() {
   local kind="${1:-}" name="${2:-}" target source docs_path
+  if [ "$kind" = --help ] || [ "$kind" = -h ]; then printf 'Usage: bbldr dotfiles scaffold app NAME\n'; return; fi
+  [ "$#" -eq 2 ] || die "Usage: bbldr dotfiles scaffold app NAME"
+  validate_registry
   [ "$kind" = app ] && [ -n "$name" ] || die "Usage: bbldr dotfiles scaffold app NAME"
   [[ "$name" =~ ^[a-z0-9][a-z0-9-]*$ ]] || die "App names must use lowercase letters, digits, and hyphens."
   package_exists "$name" && die "Package already exists: $name"
   target=".config/$name"
   source="$name/.config/$name"
   docs_path="$repo_root/docs/apps/$name.md"
+  [ ! -e "$repo_root/$name" ] || die "Package directory already exists: $repo_root/$name"
+  [ ! -e "$docs_path" ] || die "Documentation already exists: $docs_path"
   mkdir -p "$repo_root/$source"
   printf '%s\t0\tmanual\t/apps/%s\t%s\tDescribe what this application adds to the workspace.\n' "$name" "$name" "$name" >> "$packages_file"
   printf '%s\t%s\t%s\n' "$name" "$target" "$source" >> "$targets_file"
@@ -754,9 +1002,42 @@ command_scaffold() {
   log "Add real configuration files under $source before installing it."
 }
 
+command_purge() {
+  local purge_yes=0 package
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --yes|-y) purge_yes=1; shift ;;
+      --help|-h)
+        cat <<'EOF'
+Usage: bbldr dotfiles purge [--yes]
+
+Restore all registered configuration, remove managed bbldr commands, and delete
+the repository. Backups and system applications are retained.
+EOF
+        return
+        ;;
+      --*) die "Unknown purge option: $1" ;;
+      *) die "Unexpected purge argument: $1" ;;
+    esac
+  done
+  [ -z "$(git -C "$repo_root" status --porcelain)" ] || die "Purge refused because the repository has local changes."
+  if [ "$purge_yes" != 1 ]; then confirm "Restore configurations and remove the dotfiles repository?" || { log "Purge cancelled."; return; }; fi
+  command_uninstall --yes
+  while IFS= read -r package; do package_is_installed "$package" && die "Purge stopped because $package is still linked."; done < <(all_packages)
+  module_command_is_safe && rm -f "$HOME/.local/bin/bbldr-dotfiles"
+  bbldr_is_managed && rm -f "$HOME/.local/bin/bbldr"
+  cd "$HOME"
+  [ "$repo_root" != / ] && [ "$repo_root" != "$HOME" ] || die "Unsafe repository path: $repo_root"
+  rm -rf -- "${repo_root:?}"
+  log "Removed $repo_root. Applications and backups were retained."
+}
+
 command_check() {
   local -a scripts=(bin/bbldr bin/bbldr-dotfiles install.sh tmux/.local/bin/tmux-dev tmux/.local/bin/tmux-agent tmux/.local/bin/tmux-status tests/install-restore.sh tests/cli.sh)
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles check\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown check option: $1"
   cd "$repo_root"
+  validate_registry
   log "Checking shell syntax"
   bash -n "${scripts[@]}"
   zsh -n zsh/.zshrc
@@ -765,9 +1046,10 @@ command_check() {
   tests/cli.sh
   tests/install-restore.sh
   log "Checking documentation links and assets"
+  npm run docs:lint
   node tests/docs-links.mjs
   if command -v wezterm >/dev/null 2>&1; then log "Validating WezTerm configuration"; wezterm --config-file wezterm/.config/wezterm/wezterm.lua show-keys >/dev/null; fi
-  if command -v nvim >/dev/null 2>&1; then log "Validating Neovim configuration"; nvim --headless -i NONE -u nvim/.config/nvim/init.lua +qa; fi
+  if command -v nvim >/dev/null 2>&1; then log "Validating Neovim configuration"; NVIM_LOG_FILE="${TMPDIR:-/tmp}/bbldr-nvim-$$.log" nvim --headless -i NONE -u nvim/.config/nvim/init.lua +qa; fi
   if command -v tmux >/dev/null 2>&1 && [ "${BBLDR_SKIP_TMUX_RUNTIME:-0}" != 1 ]; then
     local tmux_socket="${TMPDIR:-/tmp}/bbldr-dotfiles-check-$$.sock"
     log "Validating tmux configuration"
@@ -780,6 +1062,18 @@ command_check() {
   log "All checks passed."
 }
 
+command_version() {
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then printf 'Usage: bbldr dotfiles version\n'; return; fi
+  [ "$#" -eq 0 ] || die "Unknown version option: $1"
+  printf 'bbldr dotfiles %s\n' "$version"
+}
+
+command_help() {
+  if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then usage; return; fi
+  [ "$#" -eq 0 ] || die "Unknown help option: $1"
+  usage
+}
+
 command_name="${1:-help}"
 [ "$#" -eq 0 ] || shift
 case "$command_name" in
@@ -787,12 +1081,14 @@ case "$command_name" in
   update) command_update "$@" ;;
   status) command_status "$@" ;;
   doctor) command_doctor "$@" ;;
+  packages) command_packages "$@" ;;
   backups) command_backups "$@" ;;
   restore) command_restore "$@" ;;
   uninstall) command_uninstall "$@" ;;
+  purge) command_purge "$@" ;;
   scaffold) command_scaffold "$@" ;;
   check) command_check "$@" ;;
-  version|-v|--version) printf 'bbldr dotfiles %s\n' "$version" ;;
-  help|-h|--help) usage ;;
+  version|-v|--version) command_version "$@" ;;
+  help|-h|--help) command_help "$@" ;;
   *) echo "Unknown dotfiles command: $command_name" >&2; usage >&2; exit 2 ;;
 esac

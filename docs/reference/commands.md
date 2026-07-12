@@ -20,6 +20,8 @@ bbldr dotfiles doctor
 | `bbldr <module> help` | Show commands belonging to one module. |
 
 Unknown modules return exit code `127`; unknown module commands return `2`.
+Every dotfiles subcommand supports `--help`; unknown options fail without
+running the operation.
 
 ## Install
 
@@ -46,22 +48,33 @@ With no package names, every default package in `config/packages.tsv` is used.
 ```sh
 bbldr dotfiles update
 bbldr dotfiles status
+bbldr dotfiles packages
 ```
 
 `update` refuses to proceed when the repository contains local changes. It
-performs a fast-forward-only pull, refreshes the global commands, and runs the
-doctor. `status` never modifies anything; it shows Git state, managed targets,
-and the latest restore point.
+remembers the installed packages, performs a fast-forward-only pull, removes
+their obsolete project links, refreshes the global commands, creates links for
+new files belonging to those packages, and diagnoses that selection. It never
+enables a package that was not already installed.
+
+`status` never modifies anything; it shows Git state, aggregate target state,
+and the latest restore point. `packages` lists every registered package, its
+dependency groups, installation state, and documentation route.
 
 ## Doctor
 
 ```sh
 bbldr dotfiles doctor
+bbldr dotfiles doctor tmux
+bbldr dotfiles doctor nvim zsh
+bbldr dotfiles doctor --all
 ```
 
-The doctor checks required and optional commands, the `bbldr` installation,
-every target from the package registry, Git state, and suspicious tracked file
-names. It returns non-zero when required checks fail.
+With no arguments, doctor checks detected installed packages. Package arguments
+limit the check, and `--all` checks the complete registry. It validates
+package-specific commands, `bbldr`, managed targets, Git state, and suspicious
+tracked filenames. It returns non-zero for missing dependencies, unmanaged
+targets, or security findings.
 
 ## Backups And Restore
 
@@ -93,6 +106,18 @@ Uninstall finds the original configuration-changing record for every selected
 package, removes managed links, and restores previous files. It keeps installed
 applications, the repository, `bbldr`, and all backup records.
 
+## Purge
+
+```sh
+bbldr dotfiles purge
+bbldr dotfiles purge --yes
+```
+
+Purge restores all packages, removes managed `bbldr` commands, and deletes the
+clean dotfiles repository. It retains backups, applications, fonts, package
+managers, Oh My Zsh, and plugins. It refuses to continue if Git has local
+changes or any configuration cannot be restored safely.
+
 ## Contributor Commands
 
 ```sh
@@ -101,13 +126,15 @@ bbldr dotfiles check
 npm run check
 ```
 
-`scaffold` adds package metadata, a default `~/.config/<name>` mapping, an empty
-source directory, and an application documentation template. Add real config
-files and tests before installing or opening a PR.
+`scaffold` validates both registries and refuses to overwrite an existing
+package directory or documentation page. It then adds metadata, a default
+`~/.config/<name>` mapping, an empty source directory, and an application
+documentation template. Add real config files and tests before installing or
+opening a PR.
 
 `check` runs shell syntax, ShellCheck when available, isolated CLI/install/
-restore/uninstall tests, documentation validation, application config parsing,
-the VitePress build, and Git whitespace checks.
+restore/uninstall/purge tests, registry and documentation validation,
+application config parsing, the VitePress build, and Git whitespace checks.
 
 ## tmux Layouts
 

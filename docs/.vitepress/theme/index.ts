@@ -1,6 +1,33 @@
 import DefaultTheme from 'vitepress/theme'
-import { h } from 'vue'
+import { defineComponent, h, onMounted, ref } from 'vue'
 import './style.css'
+
+const HeroVideo = defineComponent({
+  setup() {
+    const reducedMotion = ref(true)
+
+    onMounted(() => {
+      reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    })
+
+    return () => h('video', {
+      autoplay: !reducedMotion.value,
+      loop: true,
+      muted: true,
+      playsinline: true,
+      preload: 'metadata',
+      poster: '/images/apps/nvim-screenshot.png',
+      'aria-label':
+        'Dotfiles demo showing terminal, Neovim, tabs, tmux-dev, and tmux-agent'
+    }, [
+      h('source', {
+        src: '/images/demo/demo-dotfiles.mp4',
+        type: 'video/mp4'
+      }),
+      'Your browser cannot play the terminal demonstration video.'
+    ])
+  }
+})
 
 export default {
   extends: DefaultTheme,
@@ -10,20 +37,7 @@ export default {
         h(
           'figure',
           { class: 'hero-demo' },
-          h('video', {
-            autoplay: true,
-            loop: true,
-            muted: true,
-            playsinline: true,
-            preload: 'metadata',
-            'aria-label':
-              'Dotfiles demo showing terminal, Neovim, tabs, tmux-dev, and tmux-agent'
-          }, [
-            h('source', {
-              src: '/images/demo/demo-dotfiles.mp4',
-              type: 'video/mp4'
-            })
-          ])
+          h(HeroVideo)
         ),
       'layout-bottom': () =>
         h(

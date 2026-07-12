@@ -7,13 +7,19 @@ it unchanged, select packages, or fork it and adapt the registry and config.
 
 ## Does installation overwrite my existing configuration?
 
-Conflicting targets are moved into a timestamped backup before Stow runs. Use
-dry-run to see conflicts and restore or uninstall to recover the previous state.
+Only exact destination files that conflict are moved into a timestamped backup
+before Stow runs. Other files in the same directory stay in place. Use dry-run
+to see conflicts and restore or uninstall to recover the previous state.
 
 ## Does uninstall remove applications?
 
 No. It restores configuration only. Homebrew, APT packages, fonts, Oh My Zsh,
 plugins, the repository, `bbldr`, and backups remain installed.
+
+## How do I remove the repository too?
+
+Run `bbldr dotfiles purge`. It restores configuration and removes managed CLI
+commands plus the clean repository. Applications and backups remain available.
 
 ## Why use `bbldr dotfiles` instead of `dotfiles`?
 
@@ -28,6 +34,9 @@ Yes:
 bbldr dotfiles install tmux
 bbldr dotfiles install nvim
 ```
+
+`bbldr dotfiles doctor` and `update` automatically respect that partial
+selection. Use `doctor --all` only when you want to check every package.
 
 ## Where should private values go?
 

@@ -6,6 +6,14 @@ Start with the project doctor:
 ~/.local/bin/bbldr dotfiles doctor
 ```
 
+Doctor checks detected installed packages. Use a package name to narrow the
+output or `--all` to diagnose configuration that has not been installed yet:
+
+```sh
+~/.local/bin/bbldr dotfiles doctor tmux
+~/.local/bin/bbldr dotfiles doctor --all
+```
+
 It checks required commands, optional applications, managed paths, Git status,
 and suspicious tracked filenames.
 
@@ -107,6 +115,33 @@ git diff
 
 Commit or stash intentional changes before running update again.
 
+If the installer reports an unexpected origin, inspect it before changing
+anything:
+
+```sh
+git -C ~/.config/dotfiles remote -v
+```
+
+The installer refuses to pull or execute a repository whose origin differs
+from `BBLDR_DOTFILES_REPO_URL`.
+
+## Update Reports A Partial Target
+
+`partial` means some files from an installed package are linked and newer files
+are not yet linked. Run:
+
+```sh
+bbldr dotfiles update
+```
+
+The update reconciles only installed packages. A `backup required` state means
+an exact destination contains a different file; preview the installation before
+accepting the backup:
+
+```sh
+bbldr dotfiles install --dry-run --config-only <package>
+```
+
 ## Restore The Previous Setup
 
 Follow [Backups and Restore](/guides/backups-and-restore). The usual command is:
@@ -114,3 +149,7 @@ Follow [Backups and Restore](/guides/backups-and-restore). The usual command is:
 ```sh
 ~/.local/bin/bbldr dotfiles restore --backup latest
 ```
+
+For complete project removal, use `bbldr dotfiles purge` rather than deleting
+`~/.config/dotfiles` directly. The recovery guide explains how to proceed if
+the repository has already been deleted.

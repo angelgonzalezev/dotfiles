@@ -79,7 +79,7 @@ key. For example, `Ctrl+a` then `c` creates a new window.
 | --- | --- |
 | `Ctrl+a` then `c` | New window |
 | `Ctrl+a` then `-` | Split pane horizontally |
-| `Ctrl+a` then `|` | Split pane vertically |
+| `Ctrl+a` then `&#124;` | Split pane vertically |
 | `Ctrl+a` then `x` | Kill current pane |
 | `Ctrl+a` then `&` | Kill current window |
 | `Ctrl+a` then `r` | Reload configuration |

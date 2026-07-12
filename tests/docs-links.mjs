@@ -59,7 +59,9 @@ function targetExists(file, rawTarget) {
 }
 
 walk(docsRoot)
-markdownFiles.push(join(root, 'README.md'))
+for (const name of ['README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md']) {
+  markdownFiles.push(join(root, name))
+}
 
 for (const file of markdownFiles) {
   const content = readFileSync(file, 'utf8')
@@ -83,6 +85,10 @@ const packages = readFileSync(join(root, 'config', 'packages.tsv'), 'utf8')
 for (const [name, , , docs] of packages) {
   if (!existsSync(join(root, name))) failures.push(`config/packages.tsv: missing package directory ${name}`)
   if (!markdownPage(join(root, 'README.md'), docs)) failures.push(`config/packages.tsv: missing docs page ${docs}`)
+}
+
+if (!existsSync(join(root, 'docs', 'public', 'fonts', 'outfit', 'OFL.txt'))) {
+  failures.push('missing Outfit OFL license')
 }
 
 const targetRows = readFileSync(join(root, 'config', 'targets.tsv'), 'utf8').trim().split('\n').slice(1)

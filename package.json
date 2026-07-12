@@ -8,11 +8,13 @@
   },
   "scripts": {
     "check": "bin/bbldr-dotfiles check",
+    "docs:lint": "markdownlint-cli2",
     "docs:dev": "vitepress dev docs --host 127.0.0.1",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs --host 127.0.0.1"
   },
   "devDependencies": {
+    "markdownlint-cli2": "^0.23.0",
     "vitepress": "1.6.4"
   }
 }

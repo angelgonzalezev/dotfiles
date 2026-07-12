@@ -1,7 +1,8 @@
 # Backups, Restore, And Uninstall
 
-The installer records each target before GNU Stow creates links. Restore uses
-that record to recover the pre-install state without deleting unrelated files.
+The installer records each managed file before GNU Stow creates links. Restore
+uses that record to recover the pre-install state without deleting unrelated
+files stored beside the managed configuration.
 
 ## List Restore Points
 
@@ -21,6 +22,7 @@ Each record contains:
 
 ```text
 ~/.config/bbldr/backups/dotfiles/<id>/manifest.tsv
+~/.config/bbldr/backups/dotfiles/<id>/manifest-version
 ~/.config/bbldr/backups/dotfiles/<id>/status
 ```
 
@@ -32,7 +34,7 @@ configuration target. An idempotent reinstall does not replace it.
 | State | State before install | Restore action |
 | --- | --- | --- |
 | `absent` | The target did not exist. | Remove only links created by this project. |
-| `moved` | A user file or directory existed. | Remove managed links and copy the backup back. |
+| `moved` | A user file existed at that exact destination. | Remove the managed link and copy the backup back. |
 | `managed` | The target already pointed to this repo. | Keep it unchanged. |
 
 ## Restore
@@ -70,8 +72,9 @@ Or uninstall selected packages:
 bbldr dotfiles uninstall tmux zsh
 ```
 
-Uninstall searches backwards for each package's original `absent` or `moved`
-record. It deliberately retains:
+Uninstall finds each package's oldest completed `absent` or `moved` record,
+restores it, and removes newer links belonging to the same package. It
+deliberately retains:
 
 ```text
 installed applications and package managers
@@ -82,6 +85,33 @@ Oh My Zsh, plugins, and fonts
 ```
 
 This makes it possible to inspect the result, recover manually, or reinstall.
+
+## Purge The Project
+
+Restore every package and remove the repository plus managed `bbldr` commands:
+
+```sh
+bbldr dotfiles purge
+```
+
+Purge refuses to delete a repository with local Git changes. It also stops if a
+package cannot be restored or remains linked. For non-interactive use after
+reviewing the current state:
+
+```sh
+bbldr dotfiles status
+bbldr dotfiles purge --yes
+```
+
+Purge keeps the backup directory and every application or dependency installed
+through Homebrew, APT, an official release, Oh My Zsh, or a plugin installer.
+Removing shared system software automatically could break another workflow.
+
+::: warning Do not delete the repository first
+Managed files are symlinks into `~/.config/dotfiles`. Deleting that directory
+before restore or purge leaves broken links and removes the CLI module needed
+for normal recovery.
+:::
 
 ## Protection Against Data Loss
 
@@ -131,3 +161,28 @@ bbldr dotfiles backups
 
 Resolve the reported dependency or conflict and run the installer again. Do
 not delete the timestamped backup while diagnosing the failure.
+
+## Repository Missing Or Moved
+
+If the repository was deleted before uninstall, clone the same source back to
+its original location so existing links and manifest sources resolve again:
+
+```sh
+git clone https://github.com/angelgonzalezev/dotfiles.git ~/.config/dotfiles
+~/.config/dotfiles/bin/bbldr-dotfiles restore --backup latest --yes
+```
+
+If the original path cannot be recreated, inspect `manifest.tsv`. For each
+`moved` row, the final column contains the preserved file. Copy it back only
+after moving the broken target aside. Keep the complete backup directory until
+the shell and terminal start normally.
+
+## Remove Retained Dependencies
+
+Dependency removal is intentionally manual. First confirm that another project
+does not use the application. On macOS, inspect Homebrew ownership with
+`brew list`; on Ubuntu or Debian, inspect packages with `apt list --installed`.
+Oh My Zsh, its plugins, fonts, and the Linux fallback under
+`~/.local/opt/bbldr-neovim` are also outside purge. The project does not claim
+that removing these shared tools returns the complete operating system to an
+earlier package state.

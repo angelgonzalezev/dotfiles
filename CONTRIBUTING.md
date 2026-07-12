@@ -38,6 +38,8 @@ reinstall, restore, and uninstall.
 - Registry, Stow sources, docs, and tests agree.
 - macOS and Ubuntu/Debian behavior is explicit.
 - Recovery behavior is documented for installer changes.
+- New assets include verified upstream attribution and license notices.
+- Every public subcommand handles `--help` and rejects unknown options.
 - `npm run check` passes.
 
 See `contributing/playbooks/` for task-specific workflows used by humans and

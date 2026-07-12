@@ -43,8 +43,8 @@ stow --no-folding --target="$HOME" <package>
 ```
 
 With `--no-folding`, `~/.config/nvim` remains a real directory and its managed
-files are individual symlinks. This makes ownership clearer and allows another
-unmanaged file to coexist in the parent directory.
+files are individual symlinks. This makes ownership clearer and allows other
+unmanaged files to coexist inside that directory.
 
 Check a link:
 
@@ -63,8 +63,8 @@ bbldr dotfiles install --config-only nvim
 bbldr dotfiles install --config-only nvim tmux zsh
 ```
 
-The CLI selects `$HOME`, enables `--no-folding`, creates a restore manifest,
-and defaults to every configured package when no package is supplied.
+The CLI selects `$HOME`, enables `--no-folding`, creates a file-level restore
+manifest, and defaults to every configured package when no package is supplied.
 
 ::: tip Prefer the project CLI
 `bbldr dotfiles install` backs up conflicts and simulates Stow before linking.
@@ -111,8 +111,9 @@ WARNING! stowing nvim would cause conflicts
 
 Do not use `--adopt` unless you understand that it can move target content into
 the repository. The supported solution is to use the project installer so the
-original is placed in a timestamped backup and can be restored later. Use
-`bbldr dotfiles install` for that workflow.
+exact conflicting file is placed in a timestamped backup and can be restored
+later. Neighboring local files remain in place. Use `bbldr dotfiles install`
+for that workflow.
 
 ## Verify All Managed Links
 

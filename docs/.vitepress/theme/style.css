@@ -60,16 +60,6 @@
   --brand-black: #050505;
 }
 
-.dark {
-  --vp-c-bg: #050505;
-  --vp-c-bg-alt: #111;
-  --vp-c-bg-soft: #171717;
-  --vp-c-text-1: #fffaf3;
-  --vp-c-text-2: #ddd6cd;
-  --vp-c-text-3: #9e968d;
-  --vp-c-divider: #2a2a2a;
-}
-
 .VPDoc h1,
 .VPDoc h2,
 .VPDoc h3,
@@ -174,15 +164,6 @@
   text-wrap: balance;
 }
 
-.VPHomeHero .tagline {
-  color: var(--vp-c-text-2);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.25;
-  margin: 30px auto 0;
-  max-width: 780px;
-}
-
 .VPHomeHero .actions {
   justify-content: center;
   padding-top: 34px;
@@ -193,33 +174,6 @@
   font-size: 17px;
   font-weight: 800;
   padding: 0 28px;
-}
-
-.VPFeature {
-  background: #fffaf3;
-  border: 1px solid #ded8ce;
-  border-radius: 18px;
-  box-shadow: none;
-}
-
-.VPFeature .icon {
-  background: transparent;
-  font-size: 42px;
-  height: 56px;
-  width: 56px;
-}
-
-.VPFeature .title {
-  color: var(--vp-c-text-1);
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.VPFeature .details {
-  color: var(--vp-c-text-2);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.55;
 }
 
 .VPDoc p,
@@ -266,6 +220,7 @@
 .install-cta {
   margin: 28px auto 0;
   max-width: 1180px;
+  min-width: 0;
   padding: 0 24px;
   width: 100%;
 }
@@ -286,7 +241,9 @@
 }
 
 .install-cta .language-sh {
+  max-width: 100%;
   margin: 0;
+  min-width: 0;
 }
 
 .install-cta .language-sh pre {
@@ -534,8 +491,7 @@
   }
 
   .VPHomeHero .name,
-  .VPHomeHero .text,
-  .VPHomeHero .tagline {
+  .VPHomeHero .text {
     max-width: 300px;
     overflow-wrap: anywhere;
     white-space: normal;
@@ -554,10 +510,6 @@
     line-height: 1.02;
   }
 
-  .VPHomeHero .tagline {
-    font-size: 17px;
-  }
-
   .hero-demo {
     margin-top: 18px;
     padding: 0 20px;
@@ -570,6 +522,18 @@
   .install-cta {
     margin-top: 24px;
     padding: 0 20px;
+  }
+
+  .install-cta .language-sh code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .install-cta .language-sh pre {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
   }
 
   .tech-stack {

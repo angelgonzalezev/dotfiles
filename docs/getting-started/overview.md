@@ -79,8 +79,9 @@ tmux/.local/bin/          -> ~/.local/bin
 zsh/.zshrc                -> ~/.zshrc
 ```
 
-When installed, Stow creates symlinks from your home directory to this repo.
-That means the live config and the versioned config are the same file.
+When installed, Stow creates file-level symlinks from your home directory to
+this repo. That means the live config and the versioned config are the same
+file, while unrelated files can remain in the surrounding directory.
 
 ::: info Why symlinks matter
 If you edit `~/.tmux.conf`, you are really editing
@@ -96,7 +97,7 @@ Depending on what you choose during installation, the project can:
 | --- | --- |
 | Apps/tools | Install Stow, Neovim 0.10+, ripgrep, tmux, Zsh, WezTerm, a Nerd Font, Oh My Zsh, and suggestions. |
 | Config files | Link `nvim`, `wezterm`, `tmux`, and `zsh` configs into your home directory. |
-| Existing files | Move existing configs to `~/.config/bbldr/backups/dotfiles/<timestamp>/`. |
+| Existing files | Move only conflicting destination files to `~/.config/bbldr/backups/dotfiles/<timestamp>/`. |
 | Shell behavior | Add `~/.local/bin` to `PATH` and show the `👼` prompt icon. |
 | tmux workflow | Add `tmux-dev` and `tmux-agent` workspace commands. |
 | Safety | Record every target and provide a package-aware restore command. |
@@ -121,6 +122,9 @@ Depending on what you choose during installation, the project can:
 macOS-specific blur and title buttons are enabled only on macOS. Linux uses
 portable WezTerm decorations and reads tmux system information from `/proc` and
 `/sys` when available.
+
+Exact tested versions and runtime boundaries are recorded in
+[Compatibility](/getting-started/compatibility).
 
 ## What Stays Out
 

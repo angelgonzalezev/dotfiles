@@ -8,11 +8,14 @@ software. Review the source and dry-run output before applying it.
 | Input | Protection |
 | --- | --- |
 | Remote `install.sh` | Served over HTTPS from the repository; users should review it before execution. |
-| Existing configuration | Moved into timestamped backups before links are created. |
+| Existing configuration | Only conflicting files are moved into timestamped backups before links are created. |
 | GNU Stow changes | Simulated before the real link operation. |
 | `bbldr` command | Existing unrelated executables are never overwritten. |
 | Repository updates | Require a clean worktree and fast-forward-only Git history. |
 | Restore | Refuses to overwrite targets changed after installation. |
+| Repository identity | Existing install directories must match the requested Git origin and project structure. |
+| Manifests | Backup IDs and target, source, and backup paths are validated before restore. |
+| Failure handling | Errors and interrupts after manifest creation trigger rollback. |
 | Private machine values | Kept in untracked `~/.zshrc.local`. |
 
 ## Privileged Operations
@@ -34,6 +37,7 @@ or install them.
 - Run dry-run first.
 - Review `bbldr dotfiles backups` after installation.
 - Keep the backup directory until the setup has been used successfully.
+- Keep the repository in its installed location while links are active.
 - Never place secrets directly in shared config or command history.
 - Review `git diff --cached` before every contribution.
 
@@ -43,3 +47,11 @@ The installer checks `PATH`, `~/.local/bin/bbldr`, and `bbldr-dotfiles`. It
 updates only files carrying the Become Builder dispatcher marker or links
 pointing to this repository. Any unrelated command causes installation to stop
 before targets move.
+
+## Development Server
+
+VitePress is a development-only dependency and the published documentation is
+static. `npm run docs:dev` binds to `127.0.0.1`, so the local server is not
+exposed to the network by default. Dependabot monitors the locked dependency
+tree; advisories without a stable upstream fix are reviewed instead of being
+hidden or bypassed with an unsafe major upgrade.

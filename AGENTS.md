@@ -15,7 +15,9 @@ and Ubuntu/Debian.
 
 - Preserve backup, rollback, collision, dry-run, and restore safety.
 - Never add credentials, histories, local caches, or private machine paths.
+- Record the source and license of bundled third-party fonts and visual assets.
 - Keep shared config portable; use `~/.zshrc.local` for local values.
+- Keep every subcommand's `--help` read-only and reject unknown options.
 - Update behavior, help, tests, and documentation together.
 - Use `apply_patch` for manual edits and avoid unrelated refactors.
 

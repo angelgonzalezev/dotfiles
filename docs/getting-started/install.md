@@ -13,12 +13,15 @@ configuration with symlinks. Use dry-run first and review the
 
 | System | Support | Dependency manager |
 | --- | --- | --- |
-| macOS, Intel and Apple Silicon | Fully supported and tested | Homebrew |
-| Ubuntu 22.04 and 24.04 | Fully supported and tested | APT and official releases |
-| Debian 12 and 13 | Supported and tested in Debian 12 | APT and official releases |
+| macOS, Intel and Apple Silicon | Supported; CI runs on the current GitHub macOS runner | Homebrew |
+| Ubuntu 22.04 and 24.04 | Supported and lifecycle-tested in containers | APT and official releases |
+| Debian 12 and 13 | Supported and lifecycle-tested in containers | APT and official releases |
 | Other Linux distributions | Configuration linking only | Dependencies must be installed manually |
 
 Windows is not currently supported.
+
+See [Compatibility](/getting-started/compatibility) for minimum commands,
+network requirements, privileges, and platform-specific behavior.
 
 ## Preview Without Changes
 
@@ -49,6 +52,16 @@ Run from any directory:
 
 ```sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh)"
+```
+
+For a review-first installation, download and inspect the entry point before
+running it:
+
+```sh
+curl -fsSLo /tmp/bbldr-dotfiles-install.sh \
+  https://raw.githubusercontent.com/angelgonzalezev/dotfiles/main/install.sh
+less /tmp/bbldr-dotfiles-install.sh
+bash /tmp/bbldr-dotfiles-install.sh
 ```
 
 The installer asks about these dependency groups:
@@ -105,21 +118,29 @@ Unknown packages and options are rejected before any target is moved.
 
 ```text
 download install.sh
-  -> validate git, curl, platform, and command collisions
+  -> validate git and curl
   -> clone ~/.config/dotfiles
+  -> verify repository identity, registry, platform, and command collisions
   -> select dependencies and packages
   -> print plan and confirm
   -> install selected dependencies
   -> install bbldr and register bbldr-dotfiles
-  -> create timestamped manifest
-  -> move conflicting configuration into the backup
+  -> create a versioned, timestamped manifest
+  -> move only conflicting files into the backup
   -> simulate GNU Stow
   -> create links
   -> record success and print the restore command
 ```
 
-If Stow simulation or linking fails after a file has moved, the installer
-automatically returns it and marks the run `rolled-back`.
+If any backup or Stow operation fails after the manifest is created, the
+installer automatically returns moved files, removes links created during the
+attempt, and marks the run `rolled-back`.
+
+::: info Dependency boundary
+Dependencies are installed before configuration files are moved. Package
+manager changes are not rolled back automatically if a later configuration
+step fails; rerunning the installer is safe after the reported error is fixed.
+:::
 
 ## Installed Dependencies
 
@@ -166,7 +187,8 @@ Configuration targets include:
 ```
 
 Stow uses `--no-folding`: shared target directories remain real directories
-and only managed files become links.
+and only managed files become links. Existing unrelated files in those
+directories remain in place; only a conflicting destination file is backed up.
 
 ## Backups
 
@@ -174,6 +196,7 @@ Installation records live under:
 
 ```text
 ~/.config/bbldr/backups/dotfiles/<timestamp>/manifest.tsv
+~/.config/bbldr/backups/dotfiles/<timestamp>/manifest-version
 ~/.config/bbldr/backups/dotfiles/<timestamp>/status
 ~/.config/bbldr/backups/dotfiles/latest
 ```
@@ -206,6 +229,7 @@ Open a new Zsh session so `~/.local/bin` is in `PATH`, then run:
 ```sh
 bbldr modules
 bbldr dotfiles version
+bbldr dotfiles packages
 bbldr dotfiles doctor
 bbldr dotfiles status
 ```

@@ -21,7 +21,7 @@ jobs:
           cache: npm
       - name: Install system checks on Ubuntu
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y stow zsh shellcheck ripgrep
+        run: sudo apt-get update && sudo apt-get install -y stow zsh shellcheck ripgrep tmux curl gnupg
       - name: Install current Neovim on Ubuntu
         if: runner.os == 'Linux'
         run: |
@@ -30,11 +30,25 @@ jobs:
           echo "/opt/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
       - name: Install system checks on macOS
         if: runner.os == 'macOS'
-        run: brew install stow shellcheck neovim ripgrep
+        run: brew install stow shellcheck neovim ripgrep tmux && brew install --cask wezterm
       - run: npm ci
-      - name: Test install and restore on Debian 12
-        if: runner.os == 'Linux'
-        run: docker run --rm -v "$PWD:/work" -w /work debian:12-slim bash -c "apt-get update && apt-get install -y curl git stow tar && tests/install-restore.sh"
       - run: bin/bbldr-dotfiles check
         env:
           BBLDR_SKIP_DOCS: ${{ matrix.os == 'macos-latest' && '1' || '0' }}
+
+  linux-lifecycle:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+          - debian:12-slim
+          - debian:13-slim
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test lifecycle in ${{ matrix.image }}
+        run: >-
+          docker run --rm -v "$PWD:/work" -w /work ${{ matrix.image }}
+          bash -c "apt-get update && apt-get install -y curl git stow tar
+          && tests/cli.sh && tests/install-restore.sh"
