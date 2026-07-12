@@ -1054,7 +1054,7 @@ command_check() {
     local tmux_socket="${TMPDIR:-/tmp}/bbldr-dotfiles-check-$$.sock"
     log "Validating tmux configuration"
     tmux -S "$tmux_socket" -f tmux/.tmux.conf new-session -d -s bbldr-dotfiles-check
-    if ! tmux -S "$tmux_socket" list-keys -T root M-1 | grep -q 'select-pane -t 1'; then tmux -S "$tmux_socket" kill-server; die "tmux M-1 binding is missing"; fi
+    if ! tmux -S "$tmux_socket" list-keys -T root | grep -Eq 'M-1[[:space:]]+select-pane -t 1$'; then tmux -S "$tmux_socket" kill-server; die "tmux M-1 binding is missing"; fi
     tmux -S "$tmux_socket" kill-server
   fi
   if [ "${BBLDR_SKIP_DOCS:-0}" != 1 ]; then log "Building documentation"; npm run docs:build; fi

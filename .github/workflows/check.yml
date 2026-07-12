@@ -50,5 +50,5 @@ jobs:
       - name: Test lifecycle in ${{ matrix.image }}
         run: >-
           docker run --rm -v "$PWD:/work" -w /work ${{ matrix.image }}
-          bash -c "apt-get update && apt-get install -y curl git stow tar
+          bash -c "apt-get update && apt-get install -y curl git stow tar tmux
           && tests/cli.sh && tests/install-restore.sh"
