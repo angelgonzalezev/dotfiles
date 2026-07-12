@@ -221,7 +221,7 @@ canonical_target_path() {
 validate_runtime_paths() {
   local package target _source canonical_backup canonical_home canonical_repo canonical_target
   case "$backup_root" in /*) ;; *) die "Backup directory must be absolute: $backup_root" ;; esac
-  [ "$backup_root" != / ] && [ "$backup_root" != "$HOME" ] || die "Unsafe backup directory: $backup_root"
+  [[ "$backup_root" != / && "$backup_root" != "$HOME" ]] || die "Unsafe backup directory: $backup_root"
   canonical_backup="$(canonical_future_path "$backup_root")"
   canonical_home="$(canonical_future_path "$HOME")"
   canonical_repo="$(canonical_future_path "$repo_root")"
@@ -751,7 +751,7 @@ EOF
       absent) restore_remove_links "$target" "$source" ;;
       moved)
         staging="$target.bbldr-restore-$$"
-        [ ! -e "$staging" ] && [ ! -L "$staging" ] || die "Restore staging path already exists: $staging"
+        [[ ! -e "$staging" && ! -L "$staging" ]] || die "Restore staging path already exists: $staging"
         mkdir -p "$(dirname "$staging")"
         cp -a "$backup" "$staging"
         restore_remove_links "$target" "$source"
@@ -986,7 +986,7 @@ command_scaffold() {
   if [ "$kind" = --help ] || [ "$kind" = -h ]; then printf 'Usage: bbldr dotfiles scaffold app NAME\n'; return; fi
   [ "$#" -eq 2 ] || die "Usage: bbldr dotfiles scaffold app NAME"
   validate_registry
-  [ "$kind" = app ] && [ -n "$name" ] || die "Usage: bbldr dotfiles scaffold app NAME"
+  [[ "$kind" = app && -n "$name" ]] || die "Usage: bbldr dotfiles scaffold app NAME"
   [[ "$name" =~ ^[a-z0-9][a-z0-9-]*$ ]] || die "App names must use lowercase letters, digits, and hyphens."
   package_exists "$name" && die "Package already exists: $name"
   target=".config/$name"
@@ -1027,7 +1027,7 @@ EOF
   module_command_is_safe && rm -f "$HOME/.local/bin/bbldr-dotfiles"
   bbldr_is_managed && rm -f "$HOME/.local/bin/bbldr"
   cd "$HOME"
-  [ "$repo_root" != / ] && [ "$repo_root" != "$HOME" ] || die "Unsafe repository path: $repo_root"
+  [[ "$repo_root" != / && "$repo_root" != "$HOME" ]] || die "Unsafe repository path: $repo_root"
   rm -rf -- "${repo_root:?}"
   log "Removed $repo_root. Applications and backups were retained."
 }
