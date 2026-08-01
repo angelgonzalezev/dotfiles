@@ -14,7 +14,7 @@
     "docs:preview": "vitepress preview docs --host 127.0.0.1"
   },
   "devDependencies": {
-    "markdownlint-cli2": "^0.23.0",
+    "markdownlint-cli2": "^0.23.2",
     "vitepress": "1.6.4"
   }
 }
